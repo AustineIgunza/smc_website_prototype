@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --color-amber: #FFA829;
+  --color-gold: #CC8802;
+  --color-navy: #013953;
+  --color-teal: #00313F;
+  --color-cream: #F3F2EA;
+}
+
+@theme inline {
+  --color-amber: var(--color-amber);
+  --color-gold: var(--color-gold);
+  --color-navy: var(--color-navy);
+  --color-teal: var(--color-teal);
+  --color-cream: var(--color-cream);
+  --font-display: var(--font-league-spartan);
+  --font-body: var(--font-montserrat);
+  --font-accent: var(--font-rozha-one);
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Lenis */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
