@@ -13,7 +13,7 @@ interface RevealProps {
   stagger?: number;
 }
 
-const easing = [0.16, 1, 0.3, 1];
+const easing = [0.16, 1, 0.3, 1] as const;
 
 export default function Reveal({
   children,

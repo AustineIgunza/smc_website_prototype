@@ -3,16 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-/**
- * SMC Logo component — uses the official PNG lockup from /public/logo/.
- *
- * - `variant="full"`: full lockup (M monogram + STRATHMORE + MARKETING CLUB)
- * - `variant="mark"`: monogram only (cropped via CSS)
- * - `theme="dark"`: original colors — cream "STRATHMORE", amber "MARKETING CLUB" (for dark backgrounds)
- * - `theme="light"`: inverted wordmark so "STRATHMORE" reads as navy (for cream/light backgrounds)
- * - `asLink`: wraps in a Next.js Link to "/"
- */
-
 interface LogoProps {
   variant?: "full" | "mark";
   theme?: "dark" | "light";
@@ -21,6 +11,11 @@ interface LogoProps {
   asLink?: boolean;
 }
 
+const logos = {
+  dark: { src: "/logo/smc-logo-full.png", w: 1200, h: 652 },
+  light: { src: "/logo/smc-cyprus-vertical-2.png", w: 3000, h: 1425 },
+};
+
 export default function Logo({
   variant = "full",
   theme = "dark",
@@ -28,12 +23,10 @@ export default function Logo({
   className = "",
   asLink = false,
 }: LogoProps) {
-  // Actual PNG is 1200x652 → aspect ratio ~1.84
   const isMark = variant === "mark";
-  const IMG_W = 1200;
-  const IMG_H = 652;
-  const fullAspect = IMG_W / IMG_H;
-  const width = isMark ? size : Math.round(size * fullAspect);
+  const { src, w, h } = logos[theme];
+  const aspect = w / h;
+  const width = isMark ? size : Math.round(size * aspect);
   const height = size;
 
   const content = (
@@ -44,19 +37,17 @@ export default function Logo({
       style={isMark ? { width: size, height: size } : { width, height }}
     >
       <Image
-        src="/logo/smc-logo-full.png"
+        src={src}
         alt=""
         aria-hidden
         priority
-        width={IMG_W}
-        height={IMG_H}
-        className={`
-          ${isMark
+        width={w}
+        height={h}
+        className={
+          isMark
             ? "h-auto [clip-path:inset(0_22%_45%_22%)]"
             : "w-full h-full object-contain"
-          }
-          ${theme === "light" ? "[filter:brightness(0)_saturate(100%)_invert(12%)_sepia(60%)_saturate(2000%)_hue-rotate(175deg)_brightness(95%)]" : ""}
-        `}
+        }
         style={isMark ? { width: size * 2.2 } : undefined}
       />
     </span>

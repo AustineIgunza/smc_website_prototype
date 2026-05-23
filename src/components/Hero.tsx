@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import Button from "./ui/Button";
 
-const easing = [0.16, 1, 0.3, 1];
+const easing = [0.16, 1, 0.3, 1] as const;
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
