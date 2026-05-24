@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import Logo from "./Logo";
-import Button from "./ui/Button";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
 
@@ -42,15 +41,15 @@ export default function Navbar() {
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? `${dark ? "bg-teal/95" : "bg-white/95"} backdrop-blur-md shadow-lg py-3`
-          : `${dark ? "bg-teal" : "bg-white"} py-5`
+          ? `${dark ? "bg-teal/95" : "bg-white/95"} backdrop-blur-md shadow-lg py-2 sm:py-3`
+          : `${dark ? "bg-teal" : "bg-white"} py-3 sm:py-5`
       }`}
       initial={prefersReduced ? false : { y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
-        <Logo variant="full" size={50} asLink />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between">
+        <Logo variant="full" size={40} asLink />
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
@@ -76,12 +75,9 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* CTA + theme toggle + mobile toggle */}
-        <div className="flex items-center gap-3">
+        {/* Theme toggle + mobile toggle */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
-          <Button variant="primary" href="/membership" className="hidden md:inline-flex">
-            Join the Club
-          </Button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`md:hidden p-2 ${dark ? "text-cream" : "text-teal"}`}
@@ -101,7 +97,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <motion.div
-          className={`md:hidden backdrop-blur-md border-t px-6 pb-6 pt-4 ${
+          className={`md:hidden backdrop-blur-md border-t px-4 sm:px-6 pb-4 pt-3 ${
             dark
               ? "bg-teal/95 border-cream/10"
               : "bg-white/95 border-teal/10"
@@ -125,9 +121,6 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Button variant="primary" href="/membership" className="mt-4 w-full">
-            Join the Club
-          </Button>
         </motion.div>
       )}
     </motion.nav>

@@ -10,14 +10,14 @@ export default function About() {
   const dark = theme === "dark";
 
   return (
-    <section id="about" className={`relative overflow-hidden py-24 ${dark ? "bg-teal" : "bg-cream"}`}>
+    <section id="about" className={`relative overflow-hidden py-12 sm:py-24 ${dark ? "bg-teal" : "bg-cream"}`}>
       <AnimatedBg variant="dots" surface={dark ? "teal" : "cream"} />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <Reveal>
             <div className="flex items-center justify-center">
-              <Logo variant="full" size={160} />
+              <Logo variant="full" size={120} />
             </div>
           </Reveal>
 
@@ -25,14 +25,14 @@ export default function About() {
             <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4">
               Who We Are
             </p>
-            <h2 className={`font-display text-4xl md:text-5xl font-bold leading-tight mb-6 ${
+            <h2 className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4 sm:mb-6 ${
               dark ? "text-cream" : "text-navy"
             }`}>
               Where Bold Ideas
               <br />
               Meet <span className="text-amber">Real Campaigns</span>
             </h2>
-            <p className={`font-body text-lg leading-relaxed mb-6 ${
+            <p className={`font-body text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 ${
               dark ? "text-cream/70" : "text-navy/70"
             }`}>
               The Strathmore Marketing Club is the premier student-run marketing
@@ -41,7 +41,7 @@ export default function About() {
               experience in branding, digital strategy, content creation, and
               campaign execution.
             </p>
-            <p className={`font-body text-lg leading-relaxed ${
+            <p className={`font-body text-base sm:text-lg leading-relaxed ${
               dark ? "text-cream/70" : "text-navy/70"
             }`}>
               Whether you&apos;re a first-year exploring marketing or a

@@ -2,7 +2,6 @@
 
 import Reveal from "./ui/Reveal";
 import { StaggerContainer, StaggerItem } from "./ui/Reveal";
-import Button from "./ui/Button";
 import AnimatedBg from "./ui/AnimatedBg";
 import { useTheme } from "./ThemeProvider";
 
@@ -44,20 +43,20 @@ export default function Portfolio() {
   const dark = theme === "dark";
 
   return (
-    <section id="portfolio" className={`relative overflow-hidden pt-32 pb-24 ${dark ? "bg-teal" : "bg-cream"}`}>
+    <section id="portfolio" className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${dark ? "bg-teal" : "bg-cream"}`}>
       <AnimatedBg variant="diagonals" surface={dark ? "teal" : "cream"} />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal>
           <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4 text-center">
             Portfolio
           </p>
-          <h2 className={`font-display text-4xl md:text-5xl font-bold text-center mb-4 ${
+          <h2 className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold text-center mb-4 ${
             dark ? "text-cream" : "text-navy"
           }`}>
             Our <span className="text-amber">Work</span>
           </h2>
-          <p className={`font-body text-lg text-center max-w-2xl mx-auto mb-16 ${
+          <p className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-16 ${
             dark ? "text-cream/60" : "text-navy/60"
           }`}>
             Real projects. Real brands. Real results. Here&apos;s a glimpse of
@@ -65,10 +64,10 @@ export default function Portfolio() {
           </p>
         </Reveal>
 
-        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.1}>
+        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" stagger={0.1}>
           {projects.map((p) => (
             <StaggerItem key={p.title}>
-              <div className={`border rounded-2xl p-7 h-full hover:border-amber/20 transition-colors ${
+              <div className={`border rounded-2xl p-5 sm:p-7 h-full hover:border-amber/20 transition-colors ${
                 dark
                   ? "bg-navy/30 border-cream/5"
                   : "bg-teal/5 border-navy/10"
@@ -78,7 +77,7 @@ export default function Portfolio() {
                 }`}>
                   {p.category}
                 </span>
-                <h3 className={`font-display text-lg font-bold mb-3 leading-snug ${
+                <h3 className={`font-display text-base sm:text-lg font-bold mb-2 sm:mb-3 leading-snug ${
                   dark ? "text-cream" : "text-navy"
                 }`}>
                   {p.title}
@@ -92,14 +91,6 @@ export default function Portfolio() {
             </StaggerItem>
           ))}
         </StaggerContainer>
-
-        <Reveal delay={0.3}>
-          <div className="text-center mt-14">
-            <Button variant="outline" href="/portfolio">
-              Work With Us
-            </Button>
-          </div>
-        </Reveal>
       </div>
     </section>
   );

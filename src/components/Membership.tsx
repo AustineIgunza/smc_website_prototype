@@ -2,7 +2,6 @@
 
 import Reveal from "./ui/Reveal";
 import { StaggerContainer, StaggerItem } from "./ui/Reveal";
-import Button from "./ui/Button";
 import AnimatedBg from "./ui/AnimatedBg";
 import { useTheme } from "./ThemeProvider";
 
@@ -44,20 +43,20 @@ export default function Membership() {
   const dark = theme === "dark";
 
   return (
-    <section id="membership" className={`relative overflow-hidden pt-32 pb-24 ${dark ? "bg-navy" : "bg-cream"}`}>
+    <section id="membership" className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${dark ? "bg-navy" : "bg-cream"}`}>
       <AnimatedBg variant="mesh" surface={dark ? "navy" : "cream"} />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal>
           <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4 text-center">
             Membership
           </p>
-          <h2 className={`font-display text-4xl md:text-5xl font-bold text-center mb-4 ${
+          <h2 className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold text-center mb-4 ${
             dark ? "text-cream" : "text-navy"
           }`}>
             Why Join <span className="text-amber">SMC</span>?
           </h2>
-          <p className={`font-body text-lg text-center max-w-2xl mx-auto mb-16 ${
+          <p className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-16 ${
             dark ? "text-cream/60" : "text-navy/60"
           }`}>
             Membership isn&apos;t just a card — it&apos;s access to a launchpad
@@ -65,21 +64,21 @@ export default function Membership() {
           </p>
         </Reveal>
 
-        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.1}>
+        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8" stagger={0.1}>
           {benefits.map((b) => (
             <StaggerItem key={b.title}>
-              <div className={`border rounded-2xl p-8 h-full hover:border-amber/30 transition-colors ${
+              <div className={`border rounded-2xl p-5 sm:p-8 h-full hover:border-amber/30 transition-colors ${
                 dark
                   ? "bg-teal/50 border-cream/10"
                   : "bg-teal/5 border-navy/10"
               }`}>
-                <span className="text-3xl mb-4 block">{b.icon}</span>
-                <h3 className={`font-display text-xl font-bold mb-3 ${
+                <span className="text-2xl sm:text-3xl mb-3 sm:mb-4 block">{b.icon}</span>
+                <h3 className={`font-display text-lg sm:text-xl font-bold mb-2 sm:mb-3 ${
                   dark ? "text-cream" : "text-navy"
                 }`}>
                   {b.title}
                 </h3>
-                <p className={`font-body leading-relaxed ${
+                <p className={`font-body text-sm sm:text-base leading-relaxed ${
                   dark ? "text-cream/60" : "text-navy/60"
                 }`}>
                   {b.desc}
@@ -88,14 +87,6 @@ export default function Membership() {
             </StaggerItem>
           ))}
         </StaggerContainer>
-
-        <Reveal delay={0.3}>
-          <div className="text-center mt-14">
-            <Button variant="primary" href="/membership">
-              Become a Member
-            </Button>
-          </div>
-        </Reveal>
       </div>
     </section>
   );

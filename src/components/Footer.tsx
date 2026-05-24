@@ -24,8 +24,8 @@ export default function Footer() {
     <footer className="relative overflow-hidden bg-teal pt-16 pb-8">
       <AnimatedBg variant="dots" surface="teal" intensity={0.5} />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="grid md:grid-cols-3 gap-12 mb-14">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-12 mb-8 sm:mb-14">
           {/* Brand */}
           <div>
             <Logo variant="full" size={60} />
