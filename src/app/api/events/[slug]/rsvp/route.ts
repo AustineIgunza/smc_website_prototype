@@ -1,5 +1,6 @@
 import { auth } from "@/backend/auth/auth";
 import { prisma } from "@/backend/db/prisma";
+import type { PrismaClient } from "@prisma/client";
 
 export async function POST(
   _request: Request,
@@ -63,7 +64,7 @@ export async function POST(
 
   // Fresh registration — use a transaction for atomicity
   try {
-    const reg = await prisma.$transaction(async (tx) => {
+    const reg = await prisma.$transaction(async (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
       // Re-count inside transaction
       const count = await tx.registration.count({
         where: { eventId: event.id, status: { not: "CANCELLED" } },
