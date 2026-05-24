@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { leagueSpartan, montserrat, rozhaOne } from "@/lib/fonts";
 import LenisProvider from "@/components/ui/LenisProvider";
 import ThemeProvider from "@/components/ThemeProvider";
+import SessionProvider from "@/components/SessionProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -27,13 +28,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <ThemeProvider>
-          <LenisProvider>
-            <Navbar />
-            {children}
-            <Footer />
-          </LenisProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <LenisProvider>
+              <Navbar />
+              {children}
+              <Footer />
+            </LenisProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

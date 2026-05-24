@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import SectionEyebrow from "../ui/SectionEyebrow";
 import { useTheme } from "../ThemeProvider";
 
@@ -54,6 +55,7 @@ const socialLinks = [
 export default function HeroHome() {
   const ref = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
+  const { data: session } = useSession();
   const { theme } = useTheme();
   const dark = theme === "dark";
   const { scrollYProgress } = useScroll({
@@ -119,10 +121,10 @@ export default function HeroHome() {
             transition={{ duration: 0.8, delay: 0.9, ease: easing }}
           >
             <Link
-              href="/membership"
+              href={session?.user ? "/events" : "/register"}
               className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-amber text-teal font-body font-semibold text-sm tracking-wide hover:bg-gold transition-colors"
             >
-              Join the Club
+              {session?.user ? "Browse Events" : "Join the Club"}
             </Link>
             <Link
               href="/portfolio"

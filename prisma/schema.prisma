@@ -1,0 +1,86 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// NOTE: SQLite doesn't support enums. String fields with app-level validation.
+// When migrating to Supabase/Postgres, convert these back to enums + Json.
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("MEMBER") // MEMBER | ADMIN
+  createdAt     DateTime       @default(now())
+  registrations Registration[]
+  payments      Payment[]
+}
+
+model Partner {
+  id           String   @id @default(cuid())
+  name         String
+  contactEmail String
+  contactPhone String
+  createdAt    DateTime @default(now())
+  events       Event[]
+}
+
+model Event {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  title          String
+  description    String
+  category       String
+  type           String         @default("FREE") // FREE | PAID
+  priceKes       Int            @default(0)
+  capacity       Int?
+  startsAt       DateTime
+  location       String
+  status         String         @default("DRAFT") // DRAFT | PUBLISHED | CANCELLED
+  ownerType      String         @default("INTERNAL") // INTERNAL | PARTNER
+  partnerId      String?
+  partner        Partner?       @relation(fields: [partnerId], references: [id])
+  commissionRate Float          @default(0.15)
+  createdAt      DateTime       @default(now())
+  registrations  Registration[]
+  payments       Payment[]
+}
+
+model Registration {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  status    String   @default("RESERVED") // RESERVED | CONFIRMED | CANCELLED
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  payment   Payment?
+
+  @@unique([userId, eventId])
+}
+
+model Payment {
+  id                 String       @id @default(cuid())
+  registrationId     String       @unique
+  eventId            String
+  userId             String
+  amountKes          Int
+  status             String       @default("PENDING") // PENDING | SUCCESS | FAILED | TIMEOUT
+  provider           String       @default("MPESA")
+  merchantRequestId  String?
+  checkoutRequestId  String?      @unique
+  mpesaReceiptNumber String?
+  phone              String?
+  rawCallback        String?      // JSON string — will be Json type on Postgres
+  commissionKes      Int?
+  partnerShareKes    Int?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  registration       Registration @relation(fields: [registrationId], references: [id])
+  event              Event        @relation(fields: [eventId], references: [id])
+  user               User         @relation(fields: [userId], references: [id])
+}

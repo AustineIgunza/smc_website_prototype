@@ -1,33 +1,56 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Reveal from "./ui/Reveal";
 import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import Countdown from "./ui/Countdown";
 import { useTheme } from "./ThemeProvider";
-import { events, eventTags, getNextEvent, type EventItem, type EventTag } from "@/data/events";
+
+/* ── Types ──────────────────────────────────────────────── */
+interface ApiEvent {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  type: "FREE" | "PAID";
+  priceKes: number;
+  capacity: number | null;
+  spotsRemaining: number | null;
+  startsAt: string;
+  location: string;
+  ownerType: string;
+}
+
+const filterTags = ["All", "Flagship", "Workshop", "Networking", "Competition"] as const;
+type FilterTag = (typeof filterTags)[number];
 
 /* ── Event Detail Modal Content ──────────────────────── */
 function EventDetail({
   event,
   rsvpd,
   onRsvp,
+  onCancel,
+  loading,
 }: {
-  event: EventItem;
+  event: ApiEvent;
   rsvpd: boolean;
   onRsvp: () => void;
+  onCancel: () => void;
+  loading: boolean;
 }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
-  const spotsLeft = event.spotsTotal - event.spotsTaken - (rsvpd ? 1 : 0);
 
   return (
     <div className="pr-6">
       <span className="inline-block font-body text-xs font-semibold tracking-widest uppercase bg-amber/10 text-amber px-3 py-1 rounded-full mb-4">
-        {event.tag}
+        {event.category}
       </span>
       <h3
         className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
@@ -37,100 +60,133 @@ function EventDetail({
         {event.title}
       </h3>
 
-      <div className={`flex flex-wrap gap-x-5 gap-y-1 font-body text-sm mb-5 ${
-        dark ? "text-cream/50" : "text-navy/50"
-      }`}>
-        <span>{event.date}</span>
-        <span>{event.time}</span>
+      <div
+        className={`flex flex-wrap gap-x-5 gap-y-1 font-body text-sm mb-5 ${
+          dark ? "text-cream/50" : "text-navy/50"
+        }`}
+      >
+        <span>
+          {new Date(event.startsAt).toLocaleDateString("en-KE", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </span>
+        <span>
+          {new Date(event.startsAt).toLocaleTimeString("en-KE", {
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </span>
         <span>{event.location}</span>
       </div>
 
-      <p className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
-        dark ? "text-cream/70" : "text-navy/70"
-      }`}>
-        {event.longDesc}
+      <p
+        className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
+          dark ? "text-cream/70" : "text-navy/70"
+        }`}
+      >
+        {event.description}
       </p>
 
-      {/* Host */}
-      <div className="mb-5">
-        <p className={`font-body text-xs font-semibold tracking-widest uppercase mb-2 ${
-          dark ? "text-cream/40" : "text-navy/40"
-        }`}>
-          Hosted by
-        </p>
-        <p className={`font-body font-medium ${dark ? "text-cream" : "text-navy"}`}>
-          {event.host}
-        </p>
-      </div>
-
-      {/* Agenda */}
-      <div className="mb-6">
-        <p className={`font-body text-xs font-semibold tracking-widest uppercase mb-3 ${
-          dark ? "text-cream/40" : "text-navy/40"
-        }`}>
-          Agenda
-        </p>
-        <ul className="space-y-2">
-          {event.agenda.map((item, i) => (
-            <li key={i} className="flex gap-3 items-start">
-              <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-                <span className="text-amber font-body text-[10px] font-bold">{i + 1}</span>
-              </span>
-              <span className={`font-body text-sm leading-relaxed ${
-                dark ? "text-cream/65" : "text-navy/80"
-              }`}>
-                {item}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {event.type === "PAID" && (
+        <div className="mb-5">
+          <span
+            className={`inline-block font-body text-sm font-semibold px-3 py-1 rounded-full ${
+              dark ? "bg-amber/10 text-amber" : "bg-amber/10 text-amber"
+            }`}
+          >
+            KES {event.priceKes.toLocaleString()}
+          </span>
+        </div>
+      )}
 
       {/* RSVP / spots */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <motion.button
-          onClick={onRsvp}
-          disabled={rsvpd}
-          className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold tracking-wide transition-colors cursor-pointer ${
-            rsvpd
-              ? "bg-green-500/20 text-green-400 cursor-default"
-              : "bg-amber text-teal hover:bg-gold"
-          }`}
-          whileTap={rsvpd ? {} : { scale: 0.95 }}
-        >
-          {rsvpd ? (
-            <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              Reserved
-            </>
+        {event.type === "FREE" ? (
+          rsvpd ? (
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold bg-green-500/20 text-green-400">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                Registered
+              </span>
+              <motion.button
+                onClick={onCancel}
+                disabled={loading}
+                className="px-4 py-2 rounded-full font-body text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                whileTap={{ scale: 0.95 }}
+              >
+                Cancel
+              </motion.button>
+            </div>
           ) : (
-            "Register Now"
-          )}
-        </motion.button>
-        <span className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}>
-          {Math.max(0, spotsLeft)} spots left
-        </span>
+            <motion.button
+              onClick={onRsvp}
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold tracking-wide bg-amber text-teal hover:bg-gold transition-colors cursor-pointer disabled:opacity-50"
+              whileTap={{ scale: 0.95 }}
+            >
+              {loading ? "Registering..." : "Register Now"}
+            </motion.button>
+          )
+        ) : (
+          <span
+            className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}
+          >
+            Paid event — ticketing coming soon
+          </span>
+        )}
+        {event.spotsRemaining !== null && (
+          <span
+            className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}
+          >
+            {event.spotsRemaining} spots left
+          </span>
+        )}
       </div>
     </div>
   );
 }
 
 /* ── Marquee ticker ──────────────────────────────────── */
-function EventMarquee() {
+function EventMarquee({ events }: { events: ApiEvent[] }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
-  const items = events.map((e) => `${e.title} — ${e.date}`);
+  const items = events.map(
+    (e) =>
+      `${e.title} — ${new Date(e.startsAt).toLocaleDateString("en-KE", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })}`
+  );
   const joined = items.join("   •   ");
 
   if (prefersReduced) {
     return (
-      <div className={`overflow-hidden py-3 border-y ${
-        dark ? "border-cream/5" : "border-navy/5"
-      }`}>
-        <p className={`font-body text-xs tracking-wide ${dark ? "text-cream/30" : "text-navy/30"}`}>
+      <div
+        className={`overflow-hidden py-3 border-y ${
+          dark ? "border-cream/5" : "border-navy/5"
+        }`}
+      >
+        <p
+          className={`font-body text-xs tracking-wide ${
+            dark ? "text-cream/30" : "text-navy/30"
+          }`}
+        >
           Upcoming: {joined}
         </p>
       </div>
@@ -152,7 +208,7 @@ function EventMarquee() {
         {[0, 1].map((copy) => (
           <span
             key={copy}
-            className={`font-body text-xs tracking-wide mr-8 group-hover:[animation-play-state:paused] ${
+            className={`font-body text-xs tracking-wide mr-8 ${
               dark ? "text-cream/30" : "text-navy/30"
             }`}
           >
@@ -169,24 +225,121 @@ export default function Events() {
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
+  const { data: session } = useSession();
+  const router = useRouter();
 
-  const [activeFilter, setActiveFilter] = useState<EventTag>("All");
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [rsvpMap, setRsvpMap] = useState<Record<string, boolean>>({});
+  const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
+  const [selectedEvent, setSelectedEvent] = useState<ApiEvent | null>(null);
+  const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
+  const [rsvpLoading, setRsvpLoading] = useState(false);
 
-  const nextEvent = useMemo(() => getNextEvent(), []);
+  // Fetch events from API
+  useEffect(() => {
+    fetch("/api/events")
+      .then((res) => res.json())
+      .then((data) => setEvents(data))
+      .catch(console.error);
+  }, []);
+
+  // Fetch user's registrations
+  useEffect(() => {
+    if (!session?.user) {
+      setMyRegistrations(new Set());
+      return;
+    }
+    fetch("/api/me/registrations")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setMyRegistrations(new Set(data.map((r: { eventId: string }) => r.eventId)));
+        }
+      })
+      .catch(console.error);
+  }, [session]);
+
+  const nextEvent = useMemo(() => {
+    const now = Date.now();
+    const upcoming = events
+      .filter((e) => new Date(e.startsAt).getTime() > now)
+      .sort(
+        (a, b) =>
+          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+      );
+    return upcoming[0] ?? events[0];
+  }, [events]);
 
   const filtered = useMemo(
     () =>
       activeFilter === "All"
         ? events
-        : events.filter((e) => e.tag === activeFilter),
-    [activeFilter],
+        : events.filter((e) => e.category === activeFilter),
+    [activeFilter, events]
   );
 
-  const handleRsvp = (id: string) => {
-    setRsvpMap((prev) => ({ ...prev, [id]: true }));
+  const refreshEvents = useCallback(() => {
+    fetch("/api/events")
+      .then((res) => res.json())
+      .then((data) => setEvents(data))
+      .catch(console.error);
+  }, []);
+
+  const handleRsvp = async (slug: string) => {
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
+    setRsvpLoading(true);
+    try {
+      const res = await fetch(`/api/events/${slug}/rsvp`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setMyRegistrations((prev) => new Set(prev).add(data.registration.eventId));
+        refreshEvents();
+      } else {
+        alert(data.error || "Registration failed");
+      }
+    } catch {
+      alert("Something went wrong");
+    } finally {
+      setRsvpLoading(false);
+    }
   };
+
+  const handleCancel = async (slug: string, eventId: string) => {
+    setRsvpLoading(true);
+    try {
+      const res = await fetch(`/api/events/${slug}/rsvp`, { method: "DELETE" });
+      if (res.ok) {
+        setMyRegistrations((prev) => {
+          const next = new Set(prev);
+          next.delete(eventId);
+          return next;
+        });
+        refreshEvents();
+      }
+    } catch {
+      alert("Something went wrong");
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
+  if (events.length === 0) {
+    return (
+      <section
+        className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${
+          dark ? "bg-teal" : "bg-cream"
+        }`}
+      >
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 text-center">
+          <p className={`font-body ${dark ? "text-cream/40" : "text-navy/40"}`}>
+            Loading events...
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -221,17 +374,19 @@ export default function Events() {
         </Reveal>
 
         {/* Countdown + Marquee */}
-        <Reveal delay={0.1}>
-          <div className="mb-8 sm:mb-10 max-w-md mx-auto sm:mx-0">
-            <Countdown targetDate={nextEvent.isoDate} label={nextEvent.title} />
-          </div>
-          <EventMarquee />
-        </Reveal>
+        {nextEvent && (
+          <Reveal delay={0.1}>
+            <div className="mb-8 sm:mb-10 max-w-md mx-auto sm:mx-0">
+              <Countdown targetDate={nextEvent.startsAt} label={nextEvent.title} />
+            </div>
+            <EventMarquee events={events} />
+          </Reveal>
+        )}
 
         {/* Filter tabs */}
         <Reveal delay={0.15}>
           <div className="flex flex-wrap gap-2 mt-8 sm:mt-10 mb-6 sm:mb-8">
-            {eventTags.map((tag) => (
+            {filterTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => setActiveFilter(tag)}
@@ -249,16 +404,20 @@ export default function Events() {
           </div>
         </Reveal>
 
-        {/* Event cards grid — animated layout */}
+        {/* Event cards grid */}
         <motion.div layout className="grid md:grid-cols-2 gap-4 sm:gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((event) => (
               <motion.div
                 key={event.id}
                 layout
-                initial={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                initial={
+                  prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }
+                }
                 animate={{ opacity: 1, scale: 1 }}
-                exit={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                exit={
+                  prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }
+                }
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               >
                 <ClickableCard
@@ -273,17 +432,26 @@ export default function Events() {
                         className="inline-block font-body text-xs font-semibold tracking-widest uppercase bg-amber/10 text-amber px-3 py-1 rounded-full group-hover:bg-amber/20 transition-colors"
                         whileHover={prefersReduced ? {} : { scale: 1.05 }}
                       >
-                        {event.tag}
+                        {event.category}
                       </motion.span>
-                      <span
-                        className={`font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full ${
-                          event.spotsTotal - event.spotsTaken - (rsvpMap[event.id] ? 1 : 0) <= 10
-                            ? "bg-red-500/10 text-red-400"
-                            : "bg-green-500/10 text-green-400"
-                        }`}
-                      >
-                        {Math.max(0, event.spotsTotal - event.spotsTaken - (rsvpMap[event.id] ? 1 : 0))} spots
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {event.type === "PAID" && (
+                          <span className="font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-amber/10 text-amber">
+                            KES {event.priceKes}
+                          </span>
+                        )}
+                        {event.spotsRemaining !== null && (
+                          <span
+                            className={`font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full ${
+                              event.spotsRemaining <= 10
+                                ? "bg-red-500/10 text-red-400"
+                                : "bg-green-500/10 text-green-400"
+                            }`}
+                          >
+                            {event.spotsRemaining} spots
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <h3
@@ -298,34 +466,59 @@ export default function Events() {
                         dark ? "text-cream/40" : "text-navy/40"
                       }`}
                     >
-                      {event.date}
+                      {new Date(event.startsAt).toLocaleDateString("en-KE", {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </p>
                     <p
                       className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
                         dark ? "text-cream/65" : "text-navy/80"
                       }`}
                     >
-                      {event.desc}
+                      {event.description}
                     </p>
 
-                    {/* Location + time row */}
-                    <div className={`flex flex-wrap gap-x-4 gap-y-1 font-body text-xs ${
-                      dark ? "text-cream/30" : "text-navy/30"
-                    }`}>
+                    {/* Location row */}
+                    <div
+                      className={`flex flex-wrap gap-x-4 gap-y-1 font-body text-xs ${
+                        dark ? "text-cream/30" : "text-navy/30"
+                      }`}
+                    >
                       <span className="flex items-center gap-1">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        >
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
                         {event.location}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M12 6v6l4 2" />
-                        </svg>
-                        {event.time}
-                      </span>
+                      {myRegistrations.has(event.id) && (
+                        <span className="flex items-center gap-1 text-green-400">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 6L9 17l-5-5" />
+                          </svg>
+                          Registered
+                        </span>
+                      )}
                     </div>
                   </div>
                 </ClickableCard>
@@ -360,8 +553,10 @@ export default function Events() {
         {selectedEvent && (
           <EventDetail
             event={selectedEvent}
-            rsvpd={!!rsvpMap[selectedEvent.id]}
-            onRsvp={() => handleRsvp(selectedEvent.id)}
+            rsvpd={myRegistrations.has(selectedEvent.id)}
+            onRsvp={() => handleRsvp(selectedEvent.slug)}
+            onCancel={() => handleCancel(selectedEvent.slug, selectedEvent.id)}
+            loading={rsvpLoading}
           />
         )}
       </DetailModal>
