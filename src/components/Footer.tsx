@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Logo from "./Logo";
 import AnimatedBg from "./ui/AnimatedBg";
+import { useTheme } from "./ThemeProvider";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -19,26 +20,35 @@ const socials = [
   { label: "TikTok", href: "#" },
 ];
 
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 export default function Footer() {
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+
   return (
-    <footer className="relative overflow-hidden bg-teal pt-16 pb-8">
-      <AnimatedBg variant="dots" surface="teal" intensity={0.5} />
+    <footer className={`relative overflow-hidden pt-12 sm:pt-16 pb-6 sm:pb-8 ${
+      dark ? "bg-teal" : "bg-navy"
+    }`}>
+      <AnimatedBg variant="dots" surface={dark ? "teal" : "navy"} intensity={0.5} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid md:grid-cols-3 gap-6 sm:gap-12 mb-8 sm:mb-14">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-14">
           {/* Brand */}
           <div>
-            <Logo variant="full" size={60} />
+            <Logo variant="full" size={60} onDarkBg />
             <p className="font-body text-cream/50 text-sm mt-4 leading-relaxed max-w-xs">
               The premier launchpad for the next generation of marketing talent
-              at Strathmore University, Kenya.
+              at Strathmore University.
             </p>
           </div>
 
-          {/* Navigation */}
+          {/* Quick Links */}
           <div>
             <h4 className="font-display text-cream text-sm font-bold uppercase tracking-widest mb-4">
-              Navigate
+              Quick Links
             </h4>
             <ul className="space-y-2">
               {navLinks.map((l) => (
@@ -54,7 +64,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Socials */}
+          {/* Social */}
           <div>
             <h4 className="font-display text-cream text-sm font-bold uppercase tracking-widest mb-4">
               Follow Us
@@ -65,6 +75,8 @@ export default function Footer() {
                   <a
                     href={s.href}
                     className="font-body text-cream/50 hover:text-amber text-sm transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {s.label}
                   </a>
@@ -72,17 +84,46 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="font-display text-cream text-sm font-bold uppercase tracking-widest mb-4">
+              Newsletter
+            </h4>
+            <p className="font-body text-cream/50 text-sm mb-4 leading-relaxed">
+              Stay updated with the latest from SMC.
+            </p>
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="flex gap-2"
+            >
+              <input
+                type="email"
+                placeholder="Your email"
+                className="flex-1 min-w-0 px-4 py-2.5 rounded-full bg-cream/10 border border-cream/10 text-cream text-sm font-body placeholder:text-cream/30 focus:outline-none focus:border-amber/50 transition-colors"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2.5 rounded-full bg-amber text-teal font-body text-sm font-semibold hover:bg-gold transition-colors shrink-0"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
         </div>
 
-        {/* Divider + copyright */}
+        {/* Divider + copyright + back to top */}
         <div className="border-t border-cream/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-body text-cream/30 text-xs">
             &copy; {new Date().getFullYear()} Strathmore Marketing Club. All
             rights reserved.
           </p>
-          <p className="font-body text-cream/30 text-xs">
-            Strathmore University, Nairobi, Kenya
-          </p>
+          <button
+            onClick={scrollToTop}
+            className="font-body text-cream/30 hover:text-amber text-xs transition-colors cursor-pointer"
+          >
+            Back to Top &uarr;
+          </button>
         </div>
       </div>
     </footer>

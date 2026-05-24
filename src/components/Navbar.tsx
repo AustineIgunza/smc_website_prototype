@@ -41,15 +41,15 @@ export default function Navbar() {
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? `${dark ? "bg-teal/95" : "bg-white/95"} backdrop-blur-md shadow-lg py-2 sm:py-3`
-          : `${dark ? "bg-teal" : "bg-white"} py-3 sm:py-5`
+          ? `${dark ? "bg-white/95" : "bg-teal/95"} backdrop-blur-md shadow-lg py-2 sm:py-3`
+          : `${dark ? "bg-white" : "bg-teal"} py-3 sm:py-5`
       }`}
       initial={prefersReduced ? false : { y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between">
-        <Logo variant="full" size={40} asLink />
+        <Logo variant="full" size={40} asLink onDarkBg={!dark} />
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
@@ -59,8 +59,8 @@ export default function Navbar() {
               href={link.href}
               className={`relative font-body text-sm font-medium tracking-wide transition-colors py-1 ${
                 dark
-                  ? "text-cream/70 hover:text-cream"
-                  : "text-teal/70 hover:text-teal"
+                  ? "text-teal/70 hover:text-teal"
+                  : "text-cream/70 hover:text-cream"
               }`}
             >
               {link.label}
@@ -75,12 +75,18 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Theme toggle + mobile toggle */}
+        {/* Right side: theme toggle + Join Now + mobile toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
+          <Link
+            href="/membership"
+            className="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
+          >
+            Join the Club
+          </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`md:hidden p-2 ${dark ? "text-cream" : "text-teal"}`}
+            className={`md:hidden p-2 ${dark ? "text-teal" : "text-cream"}`}
             aria-label="Toggle menu"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -99,8 +105,8 @@ export default function Navbar() {
         <motion.div
           className={`md:hidden backdrop-blur-md border-t px-4 sm:px-6 pb-4 pt-3 ${
             dark
-              ? "bg-teal/95 border-cream/10"
-              : "bg-white/95 border-teal/10"
+              ? "bg-white/95 border-teal/10"
+              : "bg-teal/95 border-cream/10"
           }`}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,13 +120,19 @@ export default function Navbar() {
                 isActive(link.href)
                   ? "text-amber border-l-2 border-amber pl-3"
                   : dark
-                    ? "text-cream/70 hover:text-cream"
-                    : "text-teal/70 hover:text-teal"
+                    ? "text-teal/70 hover:text-teal"
+                    : "text-cream/70 hover:text-cream"
               }`}
             >
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/membership"
+            className="block mt-3 text-center px-5 py-3 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
+          >
+            Join the Club
+          </Link>
         </motion.div>
       )}
     </motion.nav>

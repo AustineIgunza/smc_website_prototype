@@ -1,11 +1,15 @@
-import Hero from "@/components/Hero";
-import About from "@/components/About";
+import HeroHome from "@/components/home/HeroHome";
+import MissionVision from "@/components/home/MissionVision";
+import OurStory from "@/components/home/OurStory";
+import InsideAgency from "@/components/home/InsideAgency";
 
 export default function Home() {
   return (
     <>
-      <Hero />
-      <About />
+      <HeroHome />
+      <MissionVision />
+      <OurStory />
+      <InsideAgency />
     </>
   );
 }

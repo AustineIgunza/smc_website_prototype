@@ -9,6 +9,8 @@ interface LogoProps {
   size?: number;
   className?: string;
   asLink?: boolean;
+  /** Override theme-based logo selection. true = white logo, false = green logo. */
+  onDarkBg?: boolean;
 }
 
 const logos = {
@@ -21,10 +23,14 @@ export default function Logo({
   size = 48,
   className = "",
   asLink = false,
+  onDarkBg,
 }: LogoProps) {
   const { theme } = useTheme();
   const isMark = variant === "mark";
-  const { src, w, h } = logos[theme];
+  const logoKey = onDarkBg !== undefined
+    ? (onDarkBg ? "dark" : "light")
+    : theme;
+  const { src, w, h } = logos[logoKey];
   const aspect = w / h;
   const width = isMark ? size : Math.round(size * aspect);
   const height = size;

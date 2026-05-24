@@ -33,7 +33,7 @@ export default function About() {
               Meet <span className="text-amber">Real Campaigns</span>
             </h2>
             <p className={`font-body text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 ${
-              dark ? "text-cream/70" : "text-navy/70"
+              dark ? "text-cream/70" : "text-navy/80"
             }`}>
               The Strathmore Marketing Club is the premier student-run marketing
               organization at Strathmore University. We bridge the gap between
@@ -42,7 +42,7 @@ export default function About() {
               campaign execution.
             </p>
             <p className={`font-body text-base sm:text-lg leading-relaxed ${
-              dark ? "text-cream/70" : "text-navy/70"
+              dark ? "text-cream/70" : "text-navy/80"
             }`}>
               Whether you&apos;re a first-year exploring marketing or a
               final-year sharpening your portfolio, SMC is where you grow from

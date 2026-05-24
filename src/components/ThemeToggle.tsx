@@ -13,8 +13,8 @@ export default function ThemeToggle() {
       onClick={toggle}
       className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
         dark
-          ? "text-cream hover:bg-cream/10"
-          : "text-teal hover:bg-teal/10"
+          ? "text-teal hover:bg-teal/10"
+          : "text-cream hover:bg-cream/10"
       }`}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
       whileTap={prefersReduced ? {} : { scale: 0.9 }}

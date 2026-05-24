@@ -52,6 +52,15 @@ html.lenis, html.lenis body {
   overflow: hidden;
 }
 
+/* Hide scrollbar but keep scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
