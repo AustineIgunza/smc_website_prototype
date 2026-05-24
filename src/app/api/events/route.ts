@@ -9,7 +9,7 @@ export async function GET() {
     },
   });
 
-  const mapped = events.map((e) => ({
+  const mapped = events.map((e: (typeof events)[number]) => ({
     id: e.id,
     slug: e.slug,
     title: e.title,
