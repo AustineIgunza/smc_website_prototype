@@ -2,27 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "./ThemeProvider";
 
 interface LogoProps {
   variant?: "full" | "mark";
-  theme?: "dark" | "light";
   size?: number;
   className?: string;
   asLink?: boolean;
 }
 
 const logos = {
-  dark: { src: "/logo/smc-logo-full.png", w: 1200, h: 652 },
   light: { src: "/logo/smc-cyprus-vertical-2.png", w: 3000, h: 1425 },
+  dark: { src: "/logo/smc-logo-full.png", w: 1200, h: 652 },
 };
 
 export default function Logo({
   variant = "full",
-  theme = "dark",
   size = 48,
   className = "",
   asLink = false,
 }: LogoProps) {
+  const { theme } = useTheme();
   const isMark = variant === "mark";
   const { src, w, h } = logos[theme];
   const aspect = w / h;
@@ -55,7 +55,7 @@ export default function Logo({
 
   if (asLink) {
     return (
-      <Link href="/" className="inline-flex items-center">
+      <Link href="/" className={`inline-flex items-center ${className}`}>
         {content}
       </Link>
     );

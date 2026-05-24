@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import Logo from "./Logo";
+import AnimatedBg from "./ui/AnimatedBg";
 
 const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "Membership", href: "#membership" },
-  { label: "Events", href: "#events" },
-  { label: "Portfolio", href: "#portfolio" },
-  { label: "Team", href: "#team" },
+  { label: "Home", href: "/" },
+  { label: "Membership", href: "/membership" },
+  { label: "Events", href: "/events" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Team", href: "/team" },
 ];
 
 const socials = [
@@ -19,12 +21,14 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className="bg-teal pt-16 pb-8">
-      <div className="mx-auto max-w-6xl px-6">
+    <footer className="relative overflow-hidden bg-teal pt-16 pb-8">
+      <AnimatedBg variant="dots" surface="teal" intensity={0.5} />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <div className="grid md:grid-cols-3 gap-12 mb-14">
           {/* Brand */}
           <div>
-            <Logo variant="full" theme="dark" size={60} />
+            <Logo variant="full" size={60} />
             <p className="font-body text-cream/50 text-sm mt-4 leading-relaxed max-w-xs">
               The premier launchpad for the next generation of marketing talent
               at Strathmore University, Kenya.
@@ -39,12 +43,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {navLinks.map((l) => (
                 <li key={l.label}>
-                  <a
+                  <Link
                     href={l.href}
                     className="font-body text-cream/50 hover:text-amber text-sm transition-colors"
                   >
                     {l.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

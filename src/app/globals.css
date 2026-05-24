@@ -27,6 +27,12 @@ body {
   background: var(--color-cream);
   color: var(--color-navy);
   font-family: var(--font-body), system-ui, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background: var(--color-teal);
+  color: var(--color-cream);
 }
 
 /* Lenis */

@@ -3,18 +3,21 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import Button from "./ui/Button";
+import AnimatedBg from "./ui/AnimatedBg";
+import { useTheme } from "./ThemeProvider";
 
 const easing = [0.16, 1, 0.3, 1] as const;
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
+  const { theme } = useTheme();
+  const dark = theme === "dark";
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.7], [1, 0.95]);
@@ -22,20 +25,11 @@ export default function Hero() {
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-teal"
+      className={`relative min-h-screen flex items-center justify-center overflow-hidden ${
+        dark ? "bg-teal" : "bg-cream"
+      }`}
     >
-      {/* Background watermark — actual logo */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style={prefersReduced ? {} : { y: bgY }}
-      >
-        <img
-          src="/logo/smc-logo-full.png"
-          alt=""
-          aria-hidden="true"
-          className="w-[500px] md:w-[700px] lg:w-[900px] opacity-[0.06]"
-        />
-      </motion.div>
+      <AnimatedBg variant="waves" surface={dark ? "teal" : "cream"} />
 
       {/* Content */}
       <motion.div
@@ -52,7 +46,9 @@ export default function Hero() {
         </motion.p>
 
         <motion.h1
-          className="font-display font-bold text-cream text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight mb-8"
+          className={`font-display font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight mb-8 ${
+            dark ? "text-cream" : "text-navy"
+          }`}
           initial={prefersReduced ? false : { opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: easing }}
@@ -65,7 +61,9 @@ export default function Hero() {
         </motion.h1>
 
         <motion.p
-          className="font-body text-cream/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+          className={`font-body text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed ${
+            dark ? "text-cream/70" : "text-navy/70"
+          }`}
           initial={prefersReduced ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7, ease: easing }}
@@ -80,17 +78,19 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9, ease: easing }}
         >
-          <Button variant="primary" href="#join">
+          <Button variant="primary" href="/membership">
             Join the Club
           </Button>
-          <Button variant="outline" href="#portfolio">
+          <Button variant="outline" href="/portfolio">
             See Our Work
           </Button>
         </motion.div>
       </motion.div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cream to-transparent" />
+      <div className={`absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t to-transparent z-10 ${
+        dark ? "from-teal" : "from-cream"
+      }`} />
     </section>
   );
 }
