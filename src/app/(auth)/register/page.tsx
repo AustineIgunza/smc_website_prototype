@@ -63,7 +63,7 @@ export default function RegisterPage() {
 
   return (
     <section
-      className={`min-h-screen flex items-center justify-center pt-20 pb-12 px-4 ${
+      className={`min-h-[100dvh] flex items-start sm:items-center justify-center pt-24 sm:pt-20 pb-12 px-4 ${
         dark ? "bg-teal" : "bg-cream"
       }`}
     >
@@ -104,12 +104,13 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className={`w-full px-4 py-3 rounded-xl font-body text-sm outline-none transition-colors ${
+              className={`w-full px-4 py-3 rounded-xl font-body text-base sm:text-sm outline-none transition-colors ${
                 dark
                   ? "bg-teal/50 border border-cream/10 text-cream placeholder:text-cream/25 focus:border-amber/50"
                   : "bg-cream border border-navy/10 text-navy placeholder:text-navy/25 focus:border-amber"
               }`}
               placeholder="Jane Muthoni"
+              autoComplete="name"
             />
           </div>
 
@@ -126,12 +127,13 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={`w-full px-4 py-3 rounded-xl font-body text-sm outline-none transition-colors ${
+              className={`w-full px-4 py-3 rounded-xl font-body text-base sm:text-sm outline-none transition-colors ${
                 dark
                   ? "bg-teal/50 border border-cream/10 text-cream placeholder:text-cream/25 focus:border-amber/50"
                   : "bg-cream border border-navy/10 text-navy placeholder:text-navy/25 focus:border-amber"
               }`}
               placeholder="you@strathmore.edu"
+              autoComplete="email"
             />
           </div>
 
@@ -149,12 +151,13 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className={`w-full px-4 py-3 rounded-xl font-body text-sm outline-none transition-colors ${
+              className={`w-full px-4 py-3 rounded-xl font-body text-base sm:text-sm outline-none transition-colors ${
                 dark
                   ? "bg-teal/50 border border-cream/10 text-cream placeholder:text-cream/25 focus:border-amber/50"
                   : "bg-cream border border-navy/10 text-navy placeholder:text-navy/25 focus:border-amber"
               }`}
               placeholder="Min 8 characters"
+              autoComplete="new-password"
             />
           </div>
 
