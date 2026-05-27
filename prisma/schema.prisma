@@ -1,20 +1,52 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // previewFeatures = ["driverAdapters"]  -- no longer needed in Prisma 7
 }
 
-// NOTE: SQLite doesn't support enums. String fields with app-level validation.
-// When migrating to Supabase/Postgres, convert these back to enums + Json.
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum EventType {
+  FREE
+  PAID
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+enum OwnerType {
+  INTERNAL
+  PARTNER
+}
+
+enum RegistrationStatus {
+  RESERVED
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  TIMEOUT
+}
 
 model User {
   id            String         @id @default(cuid())
   name          String
   email         String         @unique
   passwordHash  String
-  role          String         @default("MEMBER") // MEMBER | ADMIN
+  role          Role           @default(MEMBER)
   createdAt     DateTime       @default(now())
   registrations Registration[]
   payments      Payment[]
@@ -35,13 +67,13 @@ model Event {
   title          String
   description    String
   category       String
-  type           String         @default("FREE") // FREE | PAID
+  type           EventType      @default(FREE)
   priceKes       Int            @default(0)
   capacity       Int?
   startsAt       DateTime
   location       String
-  status         String         @default("DRAFT") // DRAFT | PUBLISHED | CANCELLED
-  ownerType      String         @default("INTERNAL") // INTERNAL | PARTNER
+  status         EventStatus    @default(DRAFT)
+  ownerType      OwnerType      @default(INTERNAL)
   partnerId      String?
   partner        Partner?       @relation(fields: [partnerId], references: [id])
   commissionRate Float          @default(0.15)
@@ -51,36 +83,36 @@ model Event {
 }
 
 model Registration {
-  id        String   @id @default(cuid())
+  id        String             @id @default(cuid())
   userId    String
   eventId   String
-  status    String   @default("RESERVED") // RESERVED | CONFIRMED | CANCELLED
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  status    RegistrationStatus @default(RESERVED)
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id])
+  event     Event              @relation(fields: [eventId], references: [id])
   payment   Payment?
 
   @@unique([userId, eventId])
 }
 
 model Payment {
-  id                 String       @id @default(cuid())
-  registrationId     String       @unique
+  id                 String        @id @default(cuid())
+  registrationId     String        @unique
   eventId            String
   userId             String
   amountKes          Int
-  status             String       @default("PENDING") // PENDING | SUCCESS | FAILED | TIMEOUT
-  provider           String       @default("MPESA")
+  status             PaymentStatus @default(PENDING)
+  provider           String        @default("MPESA")
   merchantRequestId  String?
-  checkoutRequestId  String?      @unique
+  checkoutRequestId  String?       @unique
   mpesaReceiptNumber String?
   phone              String?
-  rawCallback        String?      // JSON string — will be Json type on Postgres
+  rawCallback        Json?
   commissionKes      Int?
   partnerShareKes    Int?
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  registration       Registration @relation(fields: [registrationId], references: [id])
-  event              Event        @relation(fields: [eventId], references: [id])
-  user               User         @relation(fields: [userId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  registration       Registration  @relation(fields: [registrationId], references: [id])
+  event              Event         @relation(fields: [eventId], references: [id])
+  user               User          @relation(fields: [userId], references: [id])
 }

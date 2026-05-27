@@ -1,12 +1,25 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaClient, EventType, EventStatus, OwnerType } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+function createPrismaClient() {
+  const url = process.env.DATABASE_URL!;
+
+  if (url.startsWith("file:")) {
+    const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
+    const adapter = new PrismaBetterSqlite3({ url });
+    return new PrismaClient({ adapter });
+  }
+
+  const { PrismaPg } = require("@prisma/adapter-pg");
+  const adapter = new PrismaPg({ connectionString: url });
+  return new PrismaClient({ adapter });
+}
+
+const prisma = createPrismaClient();
 
 async function main() {
   console.log("Seeding database...");
@@ -52,20 +65,20 @@ async function main() {
 
   console.log(`Created partner: ${partner.name}`);
 
-  const events = [
+  const events: Prisma.EventCreateInput[] = [
     {
       slug: "marketing-week",
       title: "Marketing Week",
       description:
         "A week-long immersion featuring industry panels, brand challenges, and the annual pitch competition.",
       category: "Flagship",
-      type: "FREE",
+      type: EventType.FREE,
       priceKes: 0,
       capacity: 200,
       startsAt: new Date("2026-09-15T09:00:00"),
       location: "Strathmore Auditorium",
-      status: "PUBLISHED",
-      ownerType: "INTERNAL",
+      status: EventStatus.PUBLISHED,
+      ownerType: OwnerType.INTERNAL,
     },
     {
       slug: "digital-strategy-bootcamp",
@@ -73,13 +86,13 @@ async function main() {
       description:
         "Hands-on sessions covering SEO, social media analytics, paid ads, and content calendars.",
       category: "Workshop",
-      type: "FREE",
+      type: EventType.FREE,
       priceKes: 0,
       capacity: 40,
       startsAt: new Date("2026-07-12T10:00:00"),
       location: "SBS Computer Lab 3",
-      status: "PUBLISHED",
-      ownerType: "INTERNAL",
+      status: EventStatus.PUBLISHED,
+      ownerType: OwnerType.INTERNAL,
     },
     {
       slug: "agency-nights",
@@ -87,14 +100,14 @@ async function main() {
       description:
         "Intimate evenings with agency leaders — hear their stories, ask your questions, make connections.",
       category: "Networking",
-      type: "PAID",
+      type: EventType.PAID,
       priceKes: 500,
       capacity: 60,
       startsAt: new Date("2026-08-08T18:00:00"),
       location: "Strathmore Rooftop Lounge",
-      status: "PUBLISHED",
-      ownerType: "PARTNER",
-      partnerId: partner.id,
+      status: EventStatus.PUBLISHED,
+      ownerType: OwnerType.PARTNER,
+      partner: { connect: { id: partner.id } },
       commissionRate: 0.15,
     },
     {
@@ -103,13 +116,13 @@ async function main() {
       description:
         "Teams compete to solve a real brand brief. Winners present to the client's marketing team.",
       category: "Competition",
-      type: "FREE",
+      type: EventType.FREE,
       priceKes: 0,
       capacity: 80,
       startsAt: new Date("2026-10-03T09:00:00"),
       location: "SBS Amphitheatre",
-      status: "PUBLISHED",
-      ownerType: "INTERNAL",
+      status: EventStatus.PUBLISHED,
+      ownerType: OwnerType.INTERNAL,
     },
   ];
 
