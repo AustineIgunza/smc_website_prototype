@@ -1,16 +1,31 @@
-import { auth } from "@/backend/auth/auth";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/backend/db/prisma";
+import { rsvpSchema } from "@/backend/validators/rsvp";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const { slug } = await params;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { slug } = await params;
+  const parsed = rsvpSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+      { status: 400 }
+    );
+  }
+
+  const { name, phone } = parsed.data;
+  const guestEmail = parsed.data.email.toLowerCase();
+  const guestPhone = phone && phone.length > 0 ? phone : null;
 
   const event = await prisma.event.findUnique({
     where: { slug },
@@ -27,44 +42,25 @@ export async function POST(
     return Response.json({ error: "This is a paid event. Use the payment flow." }, { status: 400 });
   }
 
-  // Check if already registered
+  // Dedupe by (eventId, guestEmail)
   const existing = await prisma.registration.findUnique({
-    where: { userId_eventId: { userId: session.user.id, eventId: event.id } },
+    where: { eventId_guestEmail: { eventId: event.id, guestEmail } },
   });
 
   if (existing && existing.status !== "CANCELLED") {
-    return Response.json({ error: "Already registered" }, { status: 409 });
+    return Response.json(
+      { error: "This email is already registered for this event." },
+      { status: 409 }
+    );
   }
 
-  // Check capacity atomically — count active registrations and only insert if under capacity
-  if (event.capacity !== null) {
-    const activeCount = event._count.registrations;
-    if (activeCount >= event.capacity) {
-      return Response.json({ error: "Event is full" }, { status: 409 });
-    }
+  if (event.capacity !== null && event._count.registrations >= event.capacity) {
+    return Response.json({ error: "Event is full" }, { status: 409 });
   }
 
-  // Create or re-activate registration
-  if (existing && existing.status === "CANCELLED") {
-    // Re-check capacity before reactivating
-    const freshCount = await prisma.registration.count({
-      where: { eventId: event.id, status: { not: "CANCELLED" } },
-    });
-    if (event.capacity !== null && freshCount >= event.capacity) {
-      return Response.json({ error: "Event is full" }, { status: 409 });
-    }
-
-    const reg = await prisma.registration.update({
-      where: { id: existing.id },
-      data: { status: "CONFIRMED" },
-    });
-    return Response.json({ registration: reg }, { status: 200 });
-  }
-
-  // Fresh registration — use a transaction for atomicity
+  // Insert (or re-activate a cancelled entry) atomically with a capacity recount
   try {
-    const reg = await prisma.$transaction(async (tx: Omit<typeof prisma, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
-      // Re-count inside transaction
+    const reg = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const count = await tx.registration.count({
         where: { eventId: event.id, status: { not: "CANCELLED" } },
       });
@@ -73,52 +69,32 @@ export async function POST(
         throw new Error("FULL");
       }
 
+      if (existing) {
+        return tx.registration.update({
+          where: { id: existing.id },
+          data: { guestName: name, guestPhone, status: "CONFIRMED" },
+        });
+      }
+
       return tx.registration.create({
         data: {
-          userId: session.user.id,
           eventId: event.id,
+          guestName: name,
+          guestEmail,
+          guestPhone,
           status: "CONFIRMED", // Free events go straight to CONFIRMED
         },
       });
     });
 
-    return Response.json({ registration: reg }, { status: 201 });
+    return Response.json(
+      { registration: { id: reg.id, eventId: reg.eventId, status: reg.status } },
+      { status: existing ? 200 : 201 }
+    );
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "FULL") {
       return Response.json({ error: "Event is full" }, { status: 409 });
     }
     throw e;
   }
-}
-
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { slug } = await params;
-
-  const event = await prisma.event.findUnique({ where: { slug } });
-  if (!event) {
-    return Response.json({ error: "Event not found" }, { status: 404 });
-  }
-
-  const reg = await prisma.registration.findUnique({
-    where: { userId_eventId: { userId: session.user.id, eventId: event.id } },
-  });
-
-  if (!reg || reg.status === "CANCELLED") {
-    return Response.json({ error: "No active registration found" }, { status: 404 });
-  }
-
-  const updated = await prisma.registration.update({
-    where: { id: reg.id },
-    data: { status: "CANCELLED" },
-  });
-
-  return Response.json({ registration: updated });
 }

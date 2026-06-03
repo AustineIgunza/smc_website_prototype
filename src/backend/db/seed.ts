@@ -3,7 +3,6 @@ dotenv.config();
 
 import { PrismaClient, EventType, EventStatus, OwnerType } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 function createPrismaClient() {
   const url = process.env.DATABASE_URL!;
@@ -24,33 +23,6 @@ const prisma = createPrismaClient();
 async function main() {
   console.log("Seeding database...");
   console.log("DB URL:", process.env.DATABASE_URL);
-
-  const adminPassword = await bcrypt.hash("password123", 12);
-  const memberPassword = await bcrypt.hash("password123", 12);
-
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@strathmore.edu" },
-    update: {},
-    create: {
-      name: "SMC Admin",
-      email: "admin@strathmore.edu",
-      passwordHash: adminPassword,
-      role: "ADMIN",
-    },
-  });
-
-  const member = await prisma.user.upsert({
-    where: { email: "member@strathmore.edu" },
-    update: {},
-    create: {
-      name: "Jane Muthoni",
-      email: "member@strathmore.edu",
-      passwordHash: memberPassword,
-      role: "MEMBER",
-    },
-  });
-
-  console.log(`Created users: ${admin.email}, ${member.email}`);
 
   const partner = await prisma.partner.upsert({
     where: { id: "partner-ogilvy" },
@@ -136,8 +108,6 @@ async function main() {
 
   console.log(`Created ${events.length} events`);
   console.log("\nSeed complete!");
-  console.log("Admin login:  admin@strathmore.edu / password123");
-  console.log("Member login: member@strathmore.edu / password123");
 }
 
 main()

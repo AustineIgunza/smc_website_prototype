@@ -52,3 +52,5 @@ next-env.d.ts
 # documentation
 CLAUDE.md
 AGENTS.md
+
+.vercel

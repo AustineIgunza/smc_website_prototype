@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import type { FormEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Reveal from "./ui/Reveal";
 import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
@@ -33,19 +32,50 @@ type FilterTag = (typeof filterTags)[number];
 /* ── Event Detail Modal Content ──────────────────────── */
 function EventDetail({
   event,
-  rsvpd,
-  onRsvp,
-  onCancel,
-  loading,
+  onRegistered,
 }: {
   event: ApiEvent;
-  rsvpd: boolean;
-  onRsvp: () => void;
-  onCancel: () => void;
-  loading: boolean;
+  onRegistered: () => void;
 }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const inputClass = `w-full px-4 py-2.5 rounded-lg font-body text-sm outline-none transition-colors border ${
+    dark
+      ? "bg-cream/5 border-cream/15 text-cream placeholder:text-cream/30 focus:border-amber"
+      : "bg-navy/5 border-navy/15 text-navy placeholder:text-navy/30 focus:border-amber"
+  }`;
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/events/${event.slug}/rsvp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDone(true);
+        onRegistered();
+      } else {
+        setError(data.error || "Registration failed. Please try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="pr-6">
@@ -92,70 +122,95 @@ function EventDetail({
 
       {event.type === "PAID" && (
         <div className="mb-5">
-          <span
-            className={`inline-block font-body text-sm font-semibold px-3 py-1 rounded-full ${
-              dark ? "bg-amber/10 text-amber" : "bg-amber/10 text-amber"
-            }`}
-          >
+          <span className="inline-block font-body text-sm font-semibold px-3 py-1 rounded-full bg-amber/10 text-amber">
             KES {event.priceKes.toLocaleString()}
           </span>
         </div>
       )}
 
-      {/* RSVP / spots */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        {event.type === "FREE" ? (
-          rsvpd ? (
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold bg-green-500/20 text-green-400">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                Registered
-              </span>
-              <motion.button
-                onClick={onCancel}
-                disabled={loading}
-                className="px-4 py-2 rounded-full font-body text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
-                whileTap={{ scale: 0.95 }}
-              >
-                Cancel
-              </motion.button>
-            </div>
-          ) : (
+      {/* RSVP */}
+      {event.type === "PAID" ? (
+        <span className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}>
+          Paid event — ticketing coming soon
+        </span>
+      ) : done ? (
+        <div className="flex items-start gap-3 rounded-xl bg-green-500/10 px-4 py-4">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-green-400 shrink-0 mt-0.5"
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          <div>
+            <p className="font-body text-sm font-semibold text-green-400">
+              You&rsquo;re registered!
+            </p>
+            <p className={`font-body text-sm ${dark ? "text-cream/60" : "text-navy/60"}`}>
+              We&rsquo;ve saved your spot for {event.title}. A confirmation will be sent to{" "}
+              {email}.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              type="text"
+              required
+              minLength={2}
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputClass}
+              aria-label="Full name"
+            />
+            <input
+              type="email"
+              required
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputClass}
+              aria-label="Email address"
+            />
+          </div>
+          <input
+            type="tel"
+            placeholder="Phone (optional)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className={inputClass}
+            aria-label="Phone number (optional)"
+          />
+
+          {error && (
+            <p className="font-body text-sm text-red-400">{error}</p>
+          )}
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
             <motion.button
-              onClick={onRsvp}
+              type="submit"
               disabled={loading}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold tracking-wide bg-amber text-teal hover:bg-gold transition-colors cursor-pointer disabled:opacity-50"
               whileTap={{ scale: 0.95 }}
             >
               {loading ? "Registering..." : "Register Now"}
             </motion.button>
-          )
-        ) : (
-          <span
-            className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}
-          >
-            Paid event — ticketing coming soon
-          </span>
-        )}
-        {event.spotsRemaining !== null && (
-          <span
-            className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}
-          >
-            {event.spotsRemaining} spots left
-          </span>
-        )}
-      </div>
+            {event.spotsRemaining !== null && (
+              <span className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}>
+                {event.spotsRemaining} spots left
+              </span>
+            )}
+          </div>
+        </form>
+      )}
     </div>
   );
 }
@@ -225,14 +280,10 @@ export default function Events() {
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
-  const { data: session } = useSession();
-  const router = useRouter();
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
   const [selectedEvent, setSelectedEvent] = useState<ApiEvent | null>(null);
-  const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
-  const [rsvpLoading, setRsvpLoading] = useState(false);
 
   // Fetch events from API
   useEffect(() => {
@@ -241,22 +292,6 @@ export default function Events() {
       .then((data) => setEvents(data))
       .catch(console.error);
   }, []);
-
-  // Fetch user's registrations
-  useEffect(() => {
-    if (!session?.user) {
-      setMyRegistrations(new Set());
-      return;
-    }
-    fetch("/api/me/registrations")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setMyRegistrations(new Set(data.map((r: { eventId: string }) => r.eventId)));
-        }
-      })
-      .catch(console.error);
-  }, [session]);
 
   const nextEvent = useMemo(() => {
     const now = Date.now();
@@ -283,47 +318,6 @@ export default function Events() {
       .then((data) => setEvents(data))
       .catch(console.error);
   }, []);
-
-  const handleRsvp = async (slug: string) => {
-    if (!session?.user) {
-      router.push("/login");
-      return;
-    }
-    setRsvpLoading(true);
-    try {
-      const res = await fetch(`/api/events/${slug}/rsvp`, { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        setMyRegistrations((prev) => new Set(prev).add(data.registration.eventId));
-        refreshEvents();
-      } else {
-        alert(data.error || "Registration failed");
-      }
-    } catch {
-      alert("Something went wrong");
-    } finally {
-      setRsvpLoading(false);
-    }
-  };
-
-  const handleCancel = async (slug: string, eventId: string) => {
-    setRsvpLoading(true);
-    try {
-      const res = await fetch(`/api/events/${slug}/rsvp`, { method: "DELETE" });
-      if (res.ok) {
-        setMyRegistrations((prev) => {
-          const next = new Set(prev);
-          next.delete(eventId);
-          return next;
-        });
-        refreshEvents();
-      }
-    } catch {
-      alert("Something went wrong");
-    } finally {
-      setRsvpLoading(false);
-    }
-  };
 
   if (events.length === 0) {
     return (
@@ -502,23 +496,6 @@ export default function Events() {
                         </svg>
                         {event.location}
                       </span>
-                      {myRegistrations.has(event.id) && (
-                        <span className="flex items-center gap-1 text-green-400">
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                          Registered
-                        </span>
-                      )}
                     </div>
                   </div>
                 </ClickableCard>
@@ -552,11 +529,9 @@ export default function Events() {
       >
         {selectedEvent && (
           <EventDetail
+            key={selectedEvent.id}
             event={selectedEvent}
-            rsvpd={myRegistrations.has(selectedEvent.id)}
-            onRsvp={() => handleRsvp(selectedEvent.slug)}
-            onCancel={() => handleCancel(selectedEvent.slug, selectedEvent.id)}
-            loading={rsvpLoading}
+            onRegistered={refreshEvents}
           />
         )}
       </DetailModal>

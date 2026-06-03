@@ -7,11 +7,6 @@ generator client {
   // previewFeatures = ["driverAdapters"]  -- no longer needed in Prisma 7
 }
 
-enum Role {
-  MEMBER
-  ADMIN
-}
-
 enum EventType {
   FREE
   PAID
@@ -39,17 +34,6 @@ enum PaymentStatus {
   SUCCESS
   FAILED
   TIMEOUT
-}
-
-model User {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  passwordHash  String
-  role          Role           @default(MEMBER)
-  createdAt     DateTime       @default(now())
-  registrations Registration[]
-  payments      Payment[]
 }
 
 model Partner {
@@ -83,23 +67,23 @@ model Event {
 }
 
 model Registration {
-  id        String             @id @default(cuid())
-  userId    String
-  eventId   String
-  status    RegistrationStatus @default(RESERVED)
-  createdAt DateTime           @default(now())
-  user      User               @relation(fields: [userId], references: [id])
-  event     Event              @relation(fields: [eventId], references: [id])
-  payment   Payment?
+  id         String             @id @default(cuid())
+  eventId    String
+  guestName  String
+  guestEmail String
+  guestPhone String?
+  status     RegistrationStatus @default(RESERVED)
+  createdAt  DateTime           @default(now())
+  event      Event              @relation(fields: [eventId], references: [id])
+  payment    Payment?
 
-  @@unique([userId, eventId])
+  @@unique([eventId, guestEmail])
 }
 
 model Payment {
   id                 String        @id @default(cuid())
   registrationId     String        @unique
   eventId            String
-  userId             String
   amountKes          Int
   status             PaymentStatus @default(PENDING)
   provider           String        @default("MPESA")
@@ -114,5 +98,4 @@ model Payment {
   updatedAt          DateTime      @updatedAt
   registration       Registration  @relation(fields: [registrationId], references: [id])
   event              Event         @relation(fields: [eventId], references: [id])
-  user               User          @relation(fields: [userId], references: [id])
 }

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { useSession, signOut } from "next-auth/react";
 import Logo from "./Logo";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
@@ -22,7 +21,6 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const prefersReduced = useReducedMotion();
   const pathname = usePathname();
-  const { data: session } = useSession();
   const { theme } = useTheme();
   const dark = theme === "dark";
 
@@ -43,8 +41,8 @@ export default function Navbar() {
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? `${dark ? "bg-white/95" : "bg-teal/95"} backdrop-blur-md shadow-lg py-2 sm:py-3`
-          : `${dark ? "bg-white" : "bg-teal"} py-3 sm:py-5`
+          ? `${dark ? "bg-cream/95" : "bg-teal/95"} backdrop-blur-md shadow-lg py-2 sm:py-3`
+          : `${dark ? "bg-cream" : "bg-teal"} py-3 sm:py-5`
       }`}
       initial={prefersReduced ? false : { y: -100 }}
       animate={{ y: 0 }}
@@ -80,42 +78,12 @@ export default function Navbar() {
         {/* Right side: theme toggle + Join Now + mobile toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
-          {session?.user ? (
-            <div className="hidden md:flex items-center gap-3">
-              <span className={`font-body text-sm font-medium ${dark ? "text-cream/70" : "text-cream/70"}`}>
-                {session.user.name}
-              </span>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className={`inline-flex items-center justify-center px-4 py-2 rounded-full font-body text-xs font-semibold tracking-wide transition-colors cursor-pointer ${
-                  dark
-                    ? "border border-cream/20 text-cream/60 hover:bg-cream/10"
-                    : "border border-cream/20 text-cream/60 hover:bg-cream/10"
-                }`}
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-2">
-              <Link
-                href="/login"
-                className={`inline-flex items-center justify-center px-4 py-2 rounded-full font-body text-sm font-medium tracking-wide transition-colors ${
-                  dark
-                    ? "text-cream/70 hover:text-cream"
-                    : "text-cream/70 hover:text-cream"
-                }`}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
-              >
-                Join the Club
-              </Link>
-            </div>
-          )}
+          <Link
+            href="/membership"
+            className="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
+          >
+            Join the Club
+          </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`md:hidden p-2 ${dark ? "text-teal" : "text-cream"}`}
@@ -137,7 +105,7 @@ export default function Navbar() {
         <motion.div
           className={`md:hidden backdrop-blur-md border-t px-4 sm:px-6 pb-4 pt-3 ${
             dark
-              ? "bg-white/95 border-teal/10"
+              ? "bg-cream/95 border-teal/10"
               : "bg-teal/95 border-cream/10"
           }`}
           initial={{ opacity: 0, y: -10 }}
@@ -159,31 +127,12 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          {session?.user ? (
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="block w-full mt-3 text-center px-5 py-3 rounded-full border border-amber/30 text-amber font-body text-sm font-semibold tracking-wide hover:bg-amber/10 transition-colors cursor-pointer"
-            >
-              Sign Out ({session.user.name})
-            </button>
-          ) : (
-            <div className="mt-3 space-y-2">
-              <Link
-                href="/login"
-                className={`block text-center px-5 py-3 rounded-full font-body text-sm font-medium transition-colors ${
-                  dark ? "text-cream/70 hover:text-cream border border-cream/10" : "text-cream/70 hover:text-cream border border-cream/10"
-                }`}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="block text-center px-5 py-3 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
-              >
-                Join the Club
-              </Link>
-            </div>
-          )}
+          <Link
+            href="/membership"
+            className="block mt-3 text-center px-5 py-3 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
+          >
+            Join the Club
+          </Link>
         </motion.div>
       )}
     </motion.nav>
