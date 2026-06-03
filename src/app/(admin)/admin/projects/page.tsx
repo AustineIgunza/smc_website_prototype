@@ -38,7 +38,7 @@ export default async function AdminProjectsPage({
   ];
 
   return (
-    <div className="min-h-screen p-6 sm:p-10 max-w-5xl mx-auto">
+    <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>

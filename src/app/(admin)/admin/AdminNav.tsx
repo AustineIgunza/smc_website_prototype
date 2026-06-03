@@ -1,13 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Logo from "@/components/Logo";
 
 export default function AdminNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
   const isLogin = pathname === "/admin/login";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -19,33 +28,39 @@ export default function AdminNav() {
   if (isLogin) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-cream/10 bg-teal/80 backdrop-blur-md">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-teal/95 backdrop-blur-md shadow-lg py-2 sm:py-3"
+          : "bg-teal py-3 sm:py-5"
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/admin/projects" className="flex items-center gap-2 group">
-            <span className="font-display font-bold text-amber text-lg leading-none">SMC</span>
-            <span className="font-body text-cream/40 text-xs font-semibold tracking-widest uppercase mt-0.5">
-              Admin
-            </span>
+          <Link href="/admin">
+            <Logo variant="full" size={40} onDarkBg={true} />
           </Link>
+          <span className="font-body text-cream/40 text-xs font-semibold tracking-widest uppercase">
+            Admin
+          </span>
         </div>
 
-        <nav className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/portfolio"
             target="_blank"
-            className="font-body text-xs text-cream/40 hover:text-cream/70 transition-colors hidden sm:block"
+            className="hidden sm:block font-body text-sm font-medium tracking-wide text-cream/70 hover:text-cream transition-colors"
           >
-            View site ↗
+            View site
           </Link>
           <button
             onClick={handleSignOut}
-            className="font-body text-xs font-semibold px-3 py-1.5 rounded-lg border border-cream/15 text-cream/50 hover:border-cream/30 hover:text-cream/80 transition-colors"
+            className="px-5 py-2 rounded-full bg-amber text-teal font-body text-sm font-semibold tracking-wide hover:bg-gold transition-colors"
           >
             Sign out
           </button>
-        </nav>
+        </div>
       </div>
-    </header>
+    </nav>
   );
 }

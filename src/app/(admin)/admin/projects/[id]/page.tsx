@@ -18,7 +18,7 @@ export default async function EditProjectPage({
   if (!project) notFound();
 
   return (
-    <div className="min-h-screen p-6 sm:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-2xl mx-auto">
       <div className="mb-8">
         <Link
           href="/admin/projects"

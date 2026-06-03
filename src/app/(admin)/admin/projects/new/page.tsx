@@ -16,7 +16,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="min-h-screen p-6 sm:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-2xl mx-auto">
       <div className="mb-8">
         <Link href="/admin/projects" className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors">
           ← Projects
