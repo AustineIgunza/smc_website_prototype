@@ -80,6 +80,35 @@ model Registration {
   @@unique([eventId, guestEmail])
 }
 
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Project {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  title             String
+  category          String
+  desc              String
+  problem           String
+  approach          String
+  outcome           String
+  metrics           String[]
+  team              String[]
+  duration          String
+  status            ProjectStatus @default(DRAFT)
+  clientName        String?
+  coverImageUrl     String?
+  liveUrl           String?
+  tags              String[]
+  featured          Boolean       @default(false)
+  testimonial       String?
+  testimonialAuthor String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
 model Payment {
   id                 String        @id @default(cuid())
   registrationId     String        @unique
