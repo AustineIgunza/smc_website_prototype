@@ -1,18 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/backend/db/prisma";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login");
 
-  const [total, published, draft, featured] = await Promise.all([
-    prisma.project.count(),
-    prisma.project.count({ where: { status: "PUBLISHED" } }),
-    prisma.project.count({ where: { status: "DRAFT" } }),
-    prisma.project.count({ where: { featured: true } }),
+  const [
+    { count: total },
+    { count: published },
+    { count: draft },
+    { count: featured },
+  ] = await Promise.all([
+    supabase.from("Project").select("*", { count: "exact", head: true }),
+    supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
+    supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "DRAFT"),
+    supabase.from("Project").select("*", { count: "exact", head: true }).eq("featured", true),
   ]);
 
   const sections = [
