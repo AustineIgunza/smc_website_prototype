@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/backend/db/prisma";
 import EditProjectClient from "./EditProjectClient";
 
 export default async function EditProjectPage({
@@ -14,7 +13,7 @@ export default async function EditProjectPage({
   if (!user) redirect("/admin/login");
 
   const { id } = await params;
-  const project = await prisma.project.findUnique({ where: { id } });
+  const { data: project } = await supabase.from("Project").select("*").eq("id", id).single();
   if (!project) notFound();
 
   return (

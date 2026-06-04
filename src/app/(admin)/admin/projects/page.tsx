@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/backend/db/prisma";
 
 export default async function AdminProjectsPage({
   searchParams,
@@ -14,9 +13,10 @@ export default async function AdminProjectsPage({
 
   const { filter = "all" } = await searchParams;
 
-  const projects = await prisma.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const { data: projects = [] } = await supabase
+    .from("Project")
+    .select("*")
+    .order("createdAt", { ascending: false });
 
   const filtered =
     filter === "published"
