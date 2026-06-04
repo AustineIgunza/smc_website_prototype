@@ -10,14 +10,12 @@ export const metadata: Metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`dark ${leagueSpartan.variable} ${montserrat.variable}`}
+    <div
+      className={`${leagueSpartan.variable} ${montserrat.variable} min-h-screen font-body antialiased`}
+      style={{ background: "var(--color-teal)", color: "var(--color-cream)" }}
     >
-      <body className="min-h-screen font-body antialiased">
-        <AdminNav />
-        <main>{children}</main>
-      </body>
-    </html>
+      <AdminNav />
+      <main>{children}</main>
+    </div>
   );
 }

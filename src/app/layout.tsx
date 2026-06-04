@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import { leagueSpartan, montserrat, rozhaOne } from "@/lib/fonts";
-import LenisProvider from "@/components/ui/LenisProvider";
-import ThemeProvider from "@/components/ThemeProvider";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,22 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${leagueSpartan.variable} ${montserrat.variable} ${rozhaOne.variable} antialiased`}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
-          }}
-        />
-      </head>
-      <body>
-        <ThemeProvider>
-          <LenisProvider>
-            <Navbar />
-            {children}
-            <Footer />
-          </LenisProvider>
-        </ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
