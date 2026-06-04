@@ -18,7 +18,7 @@ function createPrismaClient(): PrismaClient {
   }
 
   const { PrismaPg } = require("@prisma/adapter-pg");
-  const adapter = new PrismaPg({ connectionString: url });
+  const adapter = new PrismaPg(url);
   return new PrismaClient({ adapter });
 }
 

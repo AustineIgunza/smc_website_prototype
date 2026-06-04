@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/backend/db/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { projectUpdateSchema } from "@/backend/validators/project";
 
@@ -7,8 +6,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const supabase = await createClient();
   const { id } = await params;
-  const project = await prisma.project.findUnique({ where: { id } });
+  const { data: project } = await supabase.from("Project").select("*").eq("id", id).single();
   if (!project || project.status !== "PUBLISHED") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -30,7 +30,14 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const project = await prisma.project.update({ where: { id }, data: parsed.data });
+  const { data: project, error } = await supabase
+    .from("Project")
+    .update({ ...parsed.data, updatedAt: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ project });
 }
 
@@ -43,6 +50,7 @@ export async function DELETE(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  await prisma.project.delete({ where: { id } });
+  const { error } = await supabase.from("Project").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

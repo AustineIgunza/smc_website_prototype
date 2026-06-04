@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/backend/db/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { projectSchema } from "@/backend/validators/project";
 
 export async function GET() {
-  const projects = await prisma.project.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(projects);
+  const supabase = await createClient();
+  const { data: projects } = await supabase
+    .from("Project")
+    .select("*")
+    .eq("status", "PUBLISHED")
+    .order("createdAt", { ascending: false });
+  return NextResponse.json(projects ?? []);
 }
 
 export async function POST(request: NextRequest) {
@@ -22,11 +23,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const existing = await prisma.project.findUnique({ where: { slug: parsed.data.slug } });
+  const { data: existing } = await supabase
+    .from("Project")
+    .select("id")
+    .eq("slug", parsed.data.slug)
+    .maybeSingle();
   if (existing) {
     return NextResponse.json({ error: "A project with this slug already exists" }, { status: 409 });
   }
 
-  const project = await prisma.project.create({ data: parsed.data });
+  const { data: project, error } = await supabase
+    .from("Project")
+    .insert({ id: crypto.randomUUID(), ...parsed.data, updatedAt: new Date().toISOString() })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ project }, { status: 201 });
 }
