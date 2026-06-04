@@ -1,6 +1,12 @@
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/backend/db/prisma";
+import { createClient } from "@supabase/supabase-js";
 import { rsvpSchema } from "@/backend/validators/rsvp";
+
+function supabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
 
 export async function POST(
   request: Request,
@@ -27,12 +33,13 @@ export async function POST(
   const guestEmail = parsed.data.email.toLowerCase();
   const guestPhone = phone && phone.length > 0 ? phone : null;
 
-  const event = await prisma.event.findUnique({
-    where: { slug },
-    include: {
-      _count: { select: { registrations: { where: { status: { not: "CANCELLED" } } } } },
-    },
-  });
+  const db = supabase();
+
+  const { data: event } = await db
+    .from("Event")
+    .select("id, status, type, capacity, registrations(id, status)")
+    .eq("slug", slug)
+    .single();
 
   if (!event || event.status !== "PUBLISHED") {
     return Response.json({ error: "Event not found" }, { status: 404 });
@@ -42,10 +49,20 @@ export async function POST(
     return Response.json({ error: "This is a paid event. Use the payment flow." }, { status: 400 });
   }
 
-  // Dedupe by (eventId, guestEmail)
-  const existing = await prisma.registration.findUnique({
-    where: { eventId_guestEmail: { eventId: event.id, guestEmail } },
-  });
+  const activeCount = (event.registrations as { status: string }[]).filter(
+    (r) => r.status !== "CANCELLED",
+  ).length;
+
+  if (event.capacity !== null && activeCount >= event.capacity) {
+    return Response.json({ error: "Event is full" }, { status: 409 });
+  }
+
+  const { data: existing } = await db
+    .from("Registration")
+    .select("id, status")
+    .eq("eventId", event.id)
+    .eq("guestEmail", guestEmail)
+    .maybeSingle();
 
   if (existing && existing.status !== "CANCELLED") {
     return Response.json(
@@ -54,47 +71,45 @@ export async function POST(
     );
   }
 
-  if (event.capacity !== null && event._count.registrations >= event.capacity) {
-    return Response.json({ error: "Event is full" }, { status: 409 });
-  }
-
-  // Insert (or re-activate a cancelled entry) atomically with a capacity recount
-  try {
-    const reg = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const count = await tx.registration.count({
-        where: { eventId: event.id, status: { not: "CANCELLED" } },
-      });
-
-      if (event.capacity !== null && count >= event.capacity) {
-        throw new Error("FULL");
-      }
-
-      if (existing) {
-        return tx.registration.update({
-          where: { id: existing.id },
-          data: { guestName: name, guestPhone, status: "CONFIRMED" },
-        });
-      }
-
-      return tx.registration.create({
-        data: {
-          eventId: event.id,
-          guestName: name,
-          guestEmail,
-          guestPhone,
-          status: "CONFIRMED", // Free events go straight to CONFIRMED
-        },
-      });
-    });
-
+  if (existing) {
+    const { data: reg, error } = await db
+      .from("Registration")
+      .update({ guestName: name, guestPhone, status: "CONFIRMED" })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    if (error) return Response.json({ error: error.message }, { status: 500 });
     return Response.json(
       { registration: { id: reg.id, eventId: reg.eventId, status: reg.status } },
-      { status: existing ? 200 : 201 }
+      { status: 200 }
     );
-  } catch (e: unknown) {
-    if (e instanceof Error && e.message === "FULL") {
-      return Response.json({ error: "Event is full" }, { status: 409 });
-    }
-    throw e;
   }
+
+  const { data: reg, error } = await db
+    .from("Registration")
+    .insert({
+      id: crypto.randomUUID(),
+      eventId: event.id,
+      guestName: name,
+      guestEmail,
+      guestPhone,
+      status: "CONFIRMED",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return Response.json(
+        { error: "This email is already registered for this event." },
+        { status: 409 }
+      );
+    }
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json(
+    { registration: { id: reg.id, eventId: reg.eventId, status: reg.status } },
+    { status: 201 }
+  );
 }
