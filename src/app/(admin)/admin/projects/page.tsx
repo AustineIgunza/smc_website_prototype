@@ -13,10 +13,11 @@ export default async function AdminProjectsPage({
 
   const { filter = "all" } = await searchParams;
 
-  const { data: projects = [] } = await supabase
+  const { data: projectsData } = await supabase
     .from("Project")
     .select("*")
     .order("createdAt", { ascending: false });
+  const projects = projectsData || [];
 
   const filtered =
     filter === "published"
