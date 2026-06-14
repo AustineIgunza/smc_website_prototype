@@ -128,3 +128,20 @@ model Payment {
   registration       Registration  @relation(fields: [registrationId], references: [id])
   event              Event         @relation(fields: [eventId], references: [id])
 }
+
+model TeamMember {
+  id             String   @id @default(cuid())
+  name           String
+  role           String
+  title          String
+  course         String
+  year           String
+  bio            String
+  focus          String[]
+  quote          String
+  socials        Json
+  avatarGradient String[]
+  avatarUrl      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

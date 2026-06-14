@@ -3,6 +3,7 @@ dotenv.config();
 
 import { PrismaClient, EventType, EventStatus, OwnerType, ProjectStatus } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
+import { team } from "../../data/team";
 
 function createPrismaClient() {
   const url = process.env.DATABASE_URL!;
@@ -213,6 +214,29 @@ async function main() {
   }
 
   console.log(`Created ${portfolioProjects.length} portfolio projects`);
+
+  // Seed Team Members
+  console.log("Seeding team members...");
+  for (const member of team) {
+    await prisma.teamMember.upsert({
+      where: { id: member.id },
+      update: {},
+      create: {
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        title: member.title,
+        course: member.course,
+        year: member.year,
+        bio: member.bio,
+        focus: member.focus,
+        quote: member.quote,
+        socials: member.socials as any,
+        avatarGradient: member.avatarGradient,
+      },
+    });
+  }
+  console.log(`Created ${team.length} team members`);
   console.log("\nSeed complete!");
 }
 

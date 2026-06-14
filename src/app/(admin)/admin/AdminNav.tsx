@@ -29,11 +29,10 @@ export default function AdminNav() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
           ? "bg-teal/95 backdrop-blur-md shadow-lg py-2 sm:py-3"
           : "bg-teal py-3 sm:py-5"
-      }`}
+        }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -47,7 +46,7 @@ export default function AdminNav() {
 
         <div className="flex items-center gap-3 sm:gap-4">
           <Link
-            href="/portfolio"
+            href="/"
             target="_blank"
             className="hidden sm:block font-body text-sm font-medium tracking-wide text-cream/70 hover:text-cream transition-colors"
           >

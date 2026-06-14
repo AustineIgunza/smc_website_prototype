@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Reveal from "./ui/Reveal";
 import { StaggerContainer, StaggerItem } from "./ui/Reveal";
@@ -8,7 +8,7 @@ import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import { useTheme } from "./ThemeProvider";
-import { team, type TeamMember } from "@/data/team";
+import type { TeamMember } from "@/data/team";
 
 /* ── Inline SVG Social Icons ────────────────────────── */
 const LinkedInIcon = () => (
@@ -64,7 +64,7 @@ const getSocialIcon = (platform: string) => {
   }
 };
 
-/* ── Avatar placeholder with gradient ────────────────── */
+/* ── Avatar with optional profile picture ────────────── */
 function Avatar({
   member,
   size = "md",
@@ -80,6 +80,9 @@ function Avatar({
   const dims = size === "lg" ? "w-28 h-28 sm:w-36 sm:h-36" : "w-20 h-20 sm:w-24 sm:h-24";
   const textSize = size === "lg" ? "text-4xl sm:text-5xl" : "text-2xl sm:text-3xl";
   const prefersReduced = useReducedMotion();
+  const [imgError, setImgError] = useState(false);
+
+  const hasPhoto = !!member.avatarUrl && !imgError;
 
   return (
     <div className="relative group/avatar">
@@ -90,32 +93,47 @@ function Avatar({
             hovered ? "opacity-50" : ""
           }`}
           style={{
-            background: `radial-gradient(circle, ${member.avatarGradient[0]} 0%, ${member.avatarGradient[1]} 100%)`,
+            background: hasPhoto
+              ? `radial-gradient(circle, rgba(255,168,41,0.6) 0%, rgba(204,136,2,0.4) 100%)`
+              : `radial-gradient(circle, ${member.avatarGradient[0]} 0%, ${member.avatarGradient[1]} 100%)`,
             transform: "scale(1.1)",
           }}
         />
       )}
       <div
-        className={`${dims} relative rounded-full flex items-center justify-center transition-all duration-300 border ${
+        className={`${dims} relative rounded-full flex items-center justify-center transition-all duration-300 border overflow-hidden ${
           active
             ? "ring-2 ring-amber ring-offset-2 ring-offset-teal border-transparent"
             : "border-white/20 dark:border-white/10 shadow-inner"
         } backdrop-blur-sm`}
         style={{
-          background: `linear-gradient(135deg, ${member.avatarGradient[0]}, ${member.avatarGradient[1]})`,
+          background: hasPhoto
+            ? "transparent"
+            : `linear-gradient(135deg, ${member.avatarGradient[0]}, ${member.avatarGradient[1]})`,
           boxShadow: `0 8px 16px -4px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.2)`,
         }}
       >
-        <motion.span
-          className={`font-display ${textSize} font-bold text-white tracking-wider`}
-          animate={!prefersReduced && hovered ? { scale: 1.12, rotate: 3 } : { scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
-        >
-          {member.name
-            .split(" ")
-            .map((w) => w[0])
-            .join("")}
-        </motion.span>
+        {hasPhoto ? (
+          <motion.img
+            src={member.avatarUrl}
+            alt={member.name}
+            className="w-full h-full object-cover rounded-full"
+            onError={() => setImgError(true)}
+            animate={!prefersReduced && hovered ? { scale: 1.08 } : { scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          />
+        ) : (
+          <motion.span
+            className={`font-display ${textSize} font-bold text-white tracking-wider`}
+            animate={!prefersReduced && hovered ? { scale: 1.12, rotate: 3 } : { scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          >
+            {member.name
+              .split(" ")
+              .map((w) => w[0])
+              .join("")}
+          </motion.span>
+        )}
       </div>
     </div>
   );
@@ -223,7 +241,7 @@ function MemberDetail({ member }: { member: TeamMember }) {
           Connect
         </p>
         <div className="flex flex-wrap gap-3">
-          {member.socials.map((s) => (
+          {(((member.socials as any) || []) as { platform: string; handle: string }[]).map((s) => (
             <a
               key={s.platform}
               href={getSocialLink(s.platform, s.handle)}
@@ -253,7 +271,38 @@ export default function Team() {
   const [selected, setSelected] = useState<TeamMember | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // Group team members (unused but kept for reference - removed to prevent ts compile warnings)
+  const [teamList, setTeamList] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch team members from database API
+  useEffect(() => {
+    fetch("/api/team")
+      .then((res) => res.json())
+      .then((data) => {
+        setTeamList(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <section
+        className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${
+          dark ? "bg-teal" : "bg-cream"
+        }`}
+      >
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 text-center">
+          <p className={`font-body ${dark ? "text-cream/45" : "text-navy/45"}`}>
+            Loading team profiles...
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -301,7 +350,7 @@ export default function Team() {
           className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
           stagger={0.08}
         >
-          {team.map((m) => (
+          {teamList.map((m) => (
             <StaggerItem key={m.id} y={40}>
               <ClickableCard
                 onClick={() => setSelected(m)}

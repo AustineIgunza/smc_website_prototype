@@ -12,11 +12,13 @@ export default async function AdminDashboardPage() {
     { count: published },
     { count: draft },
     { count: featured },
+    { count: totalTeam },
   ] = await Promise.all([
     supabase.from("Project").select("*", { count: "exact", head: true }),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "DRAFT"),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("featured", true),
+    supabase.from("TeamMember").select("*", { count: "exact", head: true }),
   ]);
 
   const sections = [
@@ -31,6 +33,15 @@ export default async function AdminDashboardPage() {
         { value: featured, label: "Featured" },
       ],
       cta: "Manage projects →",
+    },
+    {
+      href: "/admin/team",
+      label: "Executive Team",
+      description: "Manage club leadership profiles and focus areas.",
+      stats: [
+        { value: totalTeam, label: "Total Members" },
+      ],
+      cta: "Manage team →",
     },
   ];
 

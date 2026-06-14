@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin/projects");
+    router.push("/admin/");
     router.refresh();
   }
 
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
         <div className="bg-navy/60 border border-cream/10 rounded-2xl p-8 backdrop-blur-sm">
           <h1 className="font-display text-xl font-bold text-cream mb-1">Welcome back</h1>
           <p className="font-body text-cream/40 text-sm mb-7">
-            Sign in to manage portfolio projects.
+            Sign in to access the admin portal.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

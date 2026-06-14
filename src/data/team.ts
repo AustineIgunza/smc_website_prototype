@@ -11,6 +11,8 @@ export interface TeamMember {
   socials: { platform: string; handle: string }[];
   /** Gradient colors for placeholder avatar */
   avatarGradient: [string, string];
+  /** URL to profile picture in Supabase Storage */
+  avatarUrl?: string;
 }
 
 export const team: TeamMember[] = [
