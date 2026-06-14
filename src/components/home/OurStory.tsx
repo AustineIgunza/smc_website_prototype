@@ -4,10 +4,9 @@ import Reveal from "../ui/Reveal";
 import SectionEyebrow from "../ui/SectionEyebrow";
 import StatCard from "../ui/StatCard";
 import { useTheme } from "../ThemeProvider";
+import { DEFAULT_HOME_CONTENT, type HomeContent } from "@/data/home-defaults";
 
-/* Stats: Kenya focus, confirmed numbers (30+/10+/5+) */
-
-export default function OurStory() {
+export default function OurStory({ content = DEFAULT_HOME_CONTENT }: { content?: HomeContent }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
 
@@ -17,35 +16,27 @@ export default function OurStory() {
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Left — narrative */}
           <Reveal>
-            <SectionEyebrow label="Est. 2014" className="mb-6" />
+            <SectionEyebrow label={content.storyEyebrow} className="mb-6" />
             <h2
               className={`font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-6 ${
                 dark ? "text-cream" : "text-navy"
               }`}
             >
-              Our Story
+              {content.storyHeading}
             </h2>
             <p
               className={`font-body text-base sm:text-lg leading-relaxed mb-5 ${
                 dark ? "text-cream/60" : "text-navy/75"
               }`}
             >
-              Founded in 2014 at Strathmore University, the Strathmore
-              Marketing Club began as a small group of students passionate
-              about bridging the gap between classroom theory and real-world
-              marketing practice. What started as informal study sessions
-              quickly grew into a full-fledged student organization.
+              {content.storyParagraph1}
             </p>
             <p
               className={`font-body text-base sm:text-lg leading-relaxed ${
                 dark ? "text-cream/60" : "text-navy/75"
               }`}
             >
-              Today, SMC is the premier student-run marketing organization
-              at Strathmore — giving members hands-on experience in branding,
-              digital strategy, content creation, and campaign execution
-              through partnerships with real brands and agencies across
-              Kenya.
+              {content.storyParagraph2}
             </p>
           </Reveal>
 
@@ -53,18 +44,18 @@ export default function OurStory() {
           <Reveal delay={0.15}>
             <div className="grid grid-cols-2 gap-4">
               <StatCard
-                value={30}
-                label="Active Members"
+                value={content.stat1Value}
+                label={content.stat1Label}
                 className="col-span-1"
               />
               <StatCard
-                value={10}
-                label="Events Hosted"
+                value={content.stat2Value}
+                label={content.stat2Label}
                 className="col-span-1"
               />
               <StatCard
-                value={5}
-                label="Industry Partners — Connecting students with the best"
+                value={content.stat3Value}
+                label={content.stat3Label}
                 variant="amber"
                 className="col-span-2"
               />

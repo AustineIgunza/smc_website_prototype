@@ -17,6 +17,7 @@ export default async function AdminDashboardPage() {
     { count: publishedEvents },
     { count: draftEvents },
     { count: paidEvents },
+    homeRow,
   ] = await Promise.all([
     supabase.from("Project").select("*", { count: "exact", head: true }),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
@@ -27,9 +28,29 @@ export default async function AdminDashboardPage() {
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("status", "DRAFT"),
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("type", "PAID"),
+    supabase.from("HomeContent").select("updatedAt").eq("id", "home").maybeSingle(),
   ]);
 
-  const sections = [
+  const homeUpdatedLabel = homeRow.data?.updatedAt
+    ? `Last saved ${new Date(homeRow.data.updatedAt as string).toLocaleDateString("en-KE", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`
+    : "Not saved yet";
+
+  type Stat = { value: number | string | null; label: string };
+  type Section = { href: string; label: string; description: string; stats: Stat[]; meta?: string; cta: string };
+
+  const sections: Section[] = [
+    {
+      href: "/admin/home",
+      label: "Homepage Content",
+      description: "Edit the hero, mission, vision, story, stats, and Inside the Agency copy.",
+      stats: [],
+      meta: homeUpdatedLabel,
+      cta: "Edit homepage →",
+    },
     {
       href: "/admin/projects",
       label: "Portfolio Projects",
@@ -91,18 +112,27 @@ export default async function AdminDashboardPage() {
                 {section.description}
               </p>
 
-              <div className={`grid gap-3 mb-6 ${section.stats.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                {section.stats.map((stat) => (
-                  <div key={stat.label} className="p-3 rounded-xl bg-navy/40 border border-cream/5 text-center">
-                    <p className="font-display font-bold text-2xl text-amber">
-                      {stat.value}
-                    </p>
-                    <p className="font-body text-cream/40 text-[9px] uppercase font-semibold tracking-wider mt-1.5 leading-none">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              {section.stats.length > 0 && (
+                <div className={`grid gap-3 mb-6 ${section.stats.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                  {section.stats.map((stat) => (
+                    <div key={stat.label} className="p-3 rounded-xl bg-navy/40 border border-cream/5 text-center">
+                      <p className="font-display font-bold text-2xl text-amber">
+                        {stat.value}
+                      </p>
+                      <p className="font-body text-cream/40 text-[9px] uppercase font-semibold tracking-wider mt-1.5 leading-none">
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {section.meta && (
+                <div className="p-3 rounded-xl bg-navy/40 border border-cream/5 text-center mb-6">
+                  <p className="font-body text-cream/60 text-xs uppercase font-semibold tracking-wider">
+                    {section.meta}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="pt-4 border-t border-cream/5 flex items-center justify-between">

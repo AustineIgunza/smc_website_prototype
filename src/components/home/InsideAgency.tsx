@@ -4,8 +4,9 @@ import Reveal from "../ui/Reveal";
 import SectionEyebrow from "../ui/SectionEyebrow";
 import { StaggerContainer, StaggerItem } from "../ui/Reveal";
 import { useTheme } from "../ThemeProvider";
+import { DEFAULT_HOME_CONTENT, type HomeContent } from "@/data/home-defaults";
 
-export default function InsideAgency() {
+export default function InsideAgency({ content = DEFAULT_HOME_CONTENT }: { content?: HomeContent }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
 
@@ -13,21 +14,20 @@ export default function InsideAgency() {
     <section className={`py-16 sm:py-24 ${dark ? "bg-teal" : "bg-cream"}`}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal className="text-center mb-10 sm:mb-14">
-          <SectionEyebrow label="Inside the Agency" className="mb-4" />
+          <SectionEyebrow label={content.insideEyebrow} className="mb-4" />
           <h2
             className={`font-display text-2xl sm:text-3xl md:text-4xl font-bold mb-4 ${
               dark ? "text-cream" : "text-navy"
             }`}
           >
-            A Look at <span className="text-amber">What We Do</span>
+            {content.insideTitleStart} <span className="text-amber">{content.insideTitleAccent}</span>
           </h2>
           <p
             className={`font-body text-base sm:text-lg max-w-2xl mx-auto ${
               dark ? "text-cream/60" : "text-navy/75"
             }`}
           >
-            From brand strategy sessions to live campaign shoots — here's
-            a glimpse inside the SMC experience.
+            {content.insideSubtitle}
           </p>
         </Reveal>
 
@@ -49,7 +49,7 @@ export default function InsideAgency() {
                   dark ? "text-cream/40" : "text-navy/30"
                 }`}
               >
-                Workshop Session
+                {content.insideTile1Label}
               </span>
             </div>
           </StaggerItem>
@@ -66,7 +66,7 @@ export default function InsideAgency() {
                   dark ? "text-cream/40" : "text-navy/30"
                 }`}
               >
-                Marketing Week Panel
+                {content.insideTile2Label}
               </span>
             </div>
           </StaggerItem>
@@ -83,7 +83,7 @@ export default function InsideAgency() {
                   dark ? "text-cream/40" : "text-navy/30"
                 }`}
               >
-                Pitch Day
+                {content.insideTile3Label}
               </span>
             </div>
           </StaggerItem>
@@ -99,7 +99,7 @@ export default function InsideAgency() {
                   dark ? "text-cream/40" : "text-navy/30"
                 }`}
               >
-                Team Bonding
+                {content.insideTile4Label}
               </span>
             </div>
           </StaggerItem>

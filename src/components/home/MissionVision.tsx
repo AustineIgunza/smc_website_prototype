@@ -3,8 +3,9 @@
 import Reveal from "../ui/Reveal";
 import SectionEyebrow from "../ui/SectionEyebrow";
 import { useTheme } from "../ThemeProvider";
+import { DEFAULT_HOME_CONTENT, type HomeContent } from "@/data/home-defaults";
 
-export default function MissionVision() {
+export default function MissionVision({ content = DEFAULT_HOME_CONTENT }: { content?: HomeContent }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
 
@@ -14,50 +15,43 @@ export default function MissionVision() {
         <div className="grid md:grid-cols-2 gap-12 md:gap-20">
           {/* Mission */}
           <Reveal>
-            <SectionEyebrow label="Our Mission" variant="dash" className="mb-4" />
+            <SectionEyebrow label={content.missionEyebrow} variant="dash" className="mb-4" />
             <h2
               className={`font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4 sm:mb-6 ${
                 dark ? "text-cream" : "text-navy"
               }`}
             >
-              Building Marketing Leaders
+              {content.missionTitle}
               <br />
-              <span className="text-amber">From the Ground Up</span>
+              <span className="text-amber">{content.missionTitleAccent}</span>
             </h2>
             <p
               className={`font-body text-base sm:text-lg leading-relaxed ${
                 dark ? "text-cream/60" : "text-navy/75"
               }`}
             >
-              We equip students with the strategic thinking, creative skills,
-              and industry connections needed to thrive in the fast-evolving
-              world of marketing. Through hands-on campaigns, workshops, and
-              mentorship, we transform ambitious students into agency-ready
-              professionals.
+              {content.missionBody}
             </p>
           </Reveal>
 
           {/* Vision */}
           <Reveal delay={0.15}>
-            <SectionEyebrow label="Our Vision" variant="dash" className="mb-4" />
+            <SectionEyebrow label={content.visionEyebrow} variant="dash" className="mb-4" />
             <h2
               className={`font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4 sm:mb-6 ${
                 dark ? "text-cream" : "text-navy"
               }`}
             >
-              The Most Impactful
+              {content.visionTitle}
               <br />
-              <span className="text-amber">Student Marketing Hub</span>
+              <span className="text-amber">{content.visionTitleAccent}</span>
             </h2>
             <p
               className={`font-body text-base sm:text-lg leading-relaxed ${
                 dark ? "text-cream/60" : "text-navy/75"
               }`}
             >
-              To be the leading student-run marketing organization in Africa
-              — a launchpad where bold ideas become real campaigns, and where
-              every member graduates with a portfolio, a network, and the
-              confidence to lead.
+              {content.visionBody}
             </p>
           </Reveal>
         </div>

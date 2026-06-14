@@ -288,7 +288,7 @@ function EventMarquee({ events }: { events: ApiEvent[] }) {
   const prefersReduced = useReducedMotion();
   const items = events.map(
     (e) =>
-      `${e.title} — ${new Date(e.startsAt).toLocaleDateString("en-KE", {
+      `${e.title} · ${new Date(e.startsAt).toLocaleDateString("en-KE", {
         month: "long",
         day: "numeric",
         year: "numeric",

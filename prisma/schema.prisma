@@ -146,3 +146,51 @@ model TeamMember {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+// Singleton row (id = "home") holding all editable homepage copy.
+model HomeContent {
+  id String @id @default("home")
+
+  heroEyebrow           String
+  heroTitleLine1        String
+  heroTitleLine2        String
+  heroTitleAccent       String
+  heroSubtitle          String
+  heroPrimaryCtaLabel   String
+  heroPrimaryCtaHref    String
+  heroSecondaryCtaLabel String
+  heroSecondaryCtaHref  String
+
+  missionEyebrow     String
+  missionTitle       String
+  missionTitleAccent String
+  missionBody        String
+
+  visionEyebrow     String
+  visionTitle       String
+  visionTitleAccent String
+  visionBody        String
+
+  storyEyebrow    String
+  storyHeading    String
+  storyParagraph1 String
+  storyParagraph2 String
+
+  stat1Value Int
+  stat1Label String
+  stat2Value Int
+  stat2Label String
+  stat3Value Int
+  stat3Label String
+
+  insideEyebrow     String
+  insideTitleStart  String
+  insideTitleAccent String
+  insideSubtitle    String
+  insideTile1Label  String
+  insideTile2Label  String
+  insideTile3Label  String
+  insideTile4Label  String
+
+  updatedAt DateTime @updatedAt
+}

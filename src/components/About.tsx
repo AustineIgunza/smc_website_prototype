@@ -37,7 +37,7 @@ export default function About() {
             }`}>
               The Strathmore Marketing Club is the premier student-run marketing
               organization at Strathmore University. We bridge the gap between
-              classroom theory and industry practice — giving members hands-on
+              classroom theory and industry practice, giving members hands-on
               experience in branding, digital strategy, content creation, and
               campaign execution.
             </p>

@@ -190,7 +190,7 @@ function CaseStudyDetail({ project }: { project: Project }) {
           </p>
           {project.testimonialAuthor && (
             <p className={`font-body text-xs font-semibold ${dark ? "text-cream/40" : "text-navy/50"}`}>
-              — {project.testimonialAuthor}
+              {project.testimonialAuthor}
             </p>
           )}
         </div>

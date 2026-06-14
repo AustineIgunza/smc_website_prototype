@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import Link from "next/link";
 import SectionEyebrow from "../ui/SectionEyebrow";
 import { useTheme } from "../ThemeProvider";
+import { DEFAULT_HOME_CONTENT, type HomeContent } from "@/data/home-defaults";
 
 const easing = [0.16, 1, 0.3, 1] as const;
 
@@ -51,7 +52,7 @@ const socialLinks = [
   },
 ];
 
-export default function HeroHome() {
+export default function HeroHome({ content = DEFAULT_HOME_CONTENT }: { content?: HomeContent }) {
   const ref = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
   const { theme } = useTheme();
@@ -86,7 +87,7 @@ export default function HeroHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: easing }}
           >
-            <SectionEyebrow label="The Future of Marketing" accent="amber" className="mb-6" />
+            <SectionEyebrow label={content.heroEyebrow} accent="amber" className="mb-6" />
           </motion.div>
 
           <motion.h1
@@ -95,11 +96,11 @@ export default function HeroHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: easing }}
           >
-            Strathmore
+            {content.heroTitleLine1}
             <br />
-            Marketing
+            {content.heroTitleLine2}
             <br />
-            <span className="text-amber">Club</span>
+            <span className="text-amber">{content.heroTitleAccent}</span>
           </motion.h1>
 
           <motion.p
@@ -108,8 +109,7 @@ export default function HeroHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7, ease: easing }}
           >
-            Where Strategy Meets Creativity. Empowering the next generation
-            of marketing visionaries.
+            {content.heroSubtitle}
           </motion.p>
 
           <motion.div
@@ -119,16 +119,16 @@ export default function HeroHome() {
             transition={{ duration: 0.8, delay: 0.9, ease: easing }}
           >
             <Link
-              href="/membership"
+              href={content.heroPrimaryCtaHref}
               className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-amber text-teal font-body font-semibold text-sm tracking-wide hover:bg-gold transition-colors"
             >
-              Join the Club
+              {content.heroPrimaryCtaLabel}
             </Link>
             <Link
-              href="/portfolio"
+              href={content.heroSecondaryCtaHref}
               className="inline-flex items-center justify-center px-7 py-3.5 rounded-full border-2 border-cream/30 text-cream font-body font-semibold text-sm tracking-wide hover:bg-cream/10 backdrop-blur-sm transition-colors"
             >
-              Explore Our Work
+              {content.heroSecondaryCtaLabel}
             </Link>
           </motion.div>
 
