@@ -16,13 +16,13 @@ export default async function AdminTeamPage() {
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-end justify-between gap-4 mb-8 pb-6 border-b border-cream/10">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-cream">
+          <h1 className="font-accent text-amber text-4xl sm:text-5xl font-bold tracking-wide">
             Executive Team
           </h1>
           <p className="font-body text-cream/40 text-sm mt-1">
-            {members.length} team {members.length === 1 ? "member" : "members"} registered in database
+            {members.length} team {members.length === 1 ? "member" : "members"} in database
           </p>
         </div>
         <Link
@@ -58,47 +58,65 @@ export default async function AdminTeamPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {members.map((member) => {
             const startColor = member.avatarGradient?.[0] ?? "#FFA829";
             const endColor = member.avatarGradient?.[1] ?? "#CC8802";
+            const hasAvatar = !!member.avatarUrl;
+
             return (
               <Link
                 key={member.id}
                 href={`/admin/team/${member.id}`}
-                className="group flex items-center gap-4 p-4 rounded-xl bg-navy/60 border border-cream/5 hover:border-cream/15 hover:bg-navy/80 transition-all"
+                className="group flex flex-col p-6 sm:p-8 rounded-2xl bg-navy/60 border border-cream/10 hover:border-amber/40 hover:bg-navy/80 hover:shadow-[0_16px_32px_rgba(255,168,41,0.08)] transition-all duration-300 text-center justify-between"
               >
-                {/* Live Gradient Avatar Preview */}
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-cream font-display font-bold text-base flex-shrink-0 shadow-sm border border-cream/10 select-none"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, ${startColor}, ${endColor})`,
-                  }}
-                >
-                  {member.name.charAt(0).toUpperCase()}
-                </div>
+                <div>
+                  {/* Live Avatar Preview */}
+                  <div className="mx-auto mb-5 w-fit relative">
+                    {hasAvatar ? (
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-full overflow-hidden border border-white/20 dark:border-white/10 shadow-md transition-transform duration-300 group-hover:scale-105">
+                        <img
+                          src={member.avatarUrl!}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-white font-display font-bold text-2xl shadow-md border border-white/20 dark:border-white/10 select-none transition-transform duration-300 group-hover:scale-105"
+                        style={{
+                          backgroundImage: `linear-gradient(135deg, ${startColor}, ${endColor})`,
+                        }}
+                      >
+                        {member.name
+                          .split(" ")
+                          .map((n: string) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-display font-bold text-cream text-sm group-hover:text-amber transition-colors truncate">
-                      {member.name}
-                    </p>
-                    <span className="font-body text-[10px] uppercase font-semibold text-amber/80 tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
+                  {/* Role Tag Row */}
+                  <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+                    <span className="font-body text-[9px] uppercase font-semibold text-amber/80 tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
                       {member.role}
                     </span>
                   </div>
-                  <p className="font-body text-cream/40 text-xs mt-1 truncate">
-                    {member.title}
-                  </p>
-                  <p className="font-body text-cream/30 text-[10px] mt-0.5">
+
+                  <h4 className="font-display text-sm sm:text-base font-bold mb-2 line-clamp-1 text-cream group-hover:text-amber transition-colors">
+                    {member.name}
+                  </h4>
+                </div>
+
+                {/* Footer details */}
+                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
+                  <p className="truncate">{member.title}</p>
+                  <p className="text-[10px] text-cream/35 truncate">
                     {member.course} · {member.year}
                   </p>
                 </div>
-
-                <span className="font-body text-cream/20 text-xs hidden sm:block group-hover:text-cream/40 transition-colors">
-                  Edit →
-                </span>
               </Link>
             );
           })}

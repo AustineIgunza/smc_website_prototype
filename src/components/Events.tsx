@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import type { FormEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Reveal from "./ui/Reveal";
+import { StaggerContainer, StaggerItem } from "./ui/Reveal";
 import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
@@ -24,10 +25,40 @@ interface ApiEvent {
   startsAt: string;
   location: string;
   ownerType: string;
+  imageUrl: string | null;
 }
 
 const filterTags = ["All", "Flagship", "Workshop", "Networking", "Competition"] as const;
 type FilterTag = (typeof filterTags)[number];
+
+const getGradientForCategory = (category: string) => {
+  switch (category.toLowerCase()) {
+    case "flagship":
+      return ["#FFA829", "#CC8802"];
+    case "workshop":
+      return ["#6366f1", "#8b5cf6"];
+    case "networking":
+      return ["#059669", "#10b981"];
+    case "competition":
+      return ["#ec4899", "#f43f5e"];
+    default:
+      return ["#013953", "#00313F"];
+  }
+};
+
+/* ── Content staggers animation variables for modal ──── */
+const contentVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  }),
+};
 
 /* ── Event Detail Modal Content ──────────────────────── */
 function EventDetail({
@@ -58,15 +89,21 @@ function EventDetail({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/events/${event.slug}/rsvp`, {
+      const endpoint = event.type === "PAID" ? `/api/events/${event.slug}/pay` : `/api/events/${event.slug}/rsvp`;
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, phone }),
       });
       const data = await res.json();
       if (res.ok) {
-        setDone(true);
-        onRegistered();
+        if (event.type === "PAID") {
+          // Redirect to payment page
+          window.location.href = `/payment/${data.registrationId}`;
+        } else {
+          setDone(true);
+          onRegistered();
+        }
       } else {
         setError(data.error || "Registration failed. Please try again.");
       }
@@ -77,140 +114,169 @@ function EventDetail({
     }
   };
 
+  const colors = getGradientForCategory(event.category);
+  const hasFlyer = !!event.imageUrl;
+
   return (
-    <div className="pr-6">
-      <span className="inline-block font-body text-xs font-semibold tracking-widest uppercase bg-amber/10 text-amber px-3 py-1 rounded-full mb-4">
-        {event.category}
-      </span>
-      <h3
-        className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
-          dark ? "text-cream" : "text-navy"
-        }`}
+    <div className="pr-4">
+      {/* 1. Header with flyer & titles */}
+      <motion.div
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={contentVariants}
+        className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6"
       >
-        {event.title}
-      </h3>
+        {hasFlyer ? (
+          <img
+            src={event.imageUrl!}
+            alt={event.title}
+            className="w-28 h-28 sm:w-36 sm:h-36 object-cover rounded-2xl border border-white/10 shadow-lg"
+          />
+        ) : (
+          <div
+            className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl flex items-center justify-center text-white font-display font-bold text-4xl sm:text-5xl shadow-md border border-white/10 select-none"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+            }}
+          >
+            {event.title.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div className="text-center sm:text-left">
+          <p className="font-body text-xs font-semibold tracking-[0.2em] uppercase text-amber mb-1">
+            {event.category}
+          </p>
+          <h3
+            className={`font-display text-xl sm:text-2xl font-bold mb-1 ${
+              dark ? "text-cream" : "text-navy"
+            }`}
+          >
+            {event.title}
+          </h3>
+          <p className={`font-body text-xs ${dark ? "text-cream/50" : "text-navy/60"} flex flex-wrap gap-x-2 justify-center sm:justify-start mt-1`}>
+            <span>📍 {event.location}</span>
+            <span>&middot;</span>
+            <span>📅 {new Date(event.startsAt).toLocaleDateString("en-KE", { weekday: "short", month: "short", day: "numeric" })}</span>
+          </p>
+        </div>
+      </motion.div>
 
-      <div
-        className={`flex flex-wrap gap-x-5 gap-y-1 font-body text-sm mb-5 ${
-          dark ? "text-cream/50" : "text-navy/50"
-        }`}
-      >
-        <span>
-          {new Date(event.startsAt).toLocaleDateString("en-KE", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </span>
-        <span>
-          {new Date(event.startsAt).toLocaleTimeString("en-KE", {
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-        </span>
-        <span>{event.location}</span>
-      </div>
-
-      <p
-        className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
-          dark ? "text-cream/70" : "text-navy/70"
+      {/* 2. Description */}
+      <motion.p
+        custom={1}
+        initial="hidden"
+        animate="visible"
+        variants={contentVariants}
+        className={`font-body text-sm leading-relaxed mb-6 ${
+          dark ? "text-cream/70" : "text-navy/80"
         }`}
       >
         {event.description}
-      </p>
+      </motion.p>
 
-      {event.type === "PAID" && (
-        <div className="mb-5">
-          <span className="inline-block font-body text-sm font-semibold px-3 py-1 rounded-full bg-amber/10 text-amber">
-            KES {event.priceKes.toLocaleString()}
-          </span>
-        </div>
-      )}
-
-      {/* RSVP */}
-      {event.type === "PAID" ? (
-        <span className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}>
-          Paid event — ticketing coming soon
-        </span>
-      ) : done ? (
-        <div className="flex items-start gap-3 rounded-xl bg-green-500/10 px-4 py-4">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-green-400 shrink-0 mt-0.5"
-          >
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          <div>
-            <p className="font-body text-sm font-semibold text-green-400">
-              You&rsquo;re registered!
-            </p>
-            <p className={`font-body text-sm ${dark ? "text-cream/60" : "text-navy/60"}`}>
-              We&rsquo;ve saved your spot for {event.title}. A confirmation will be sent to{" "}
-              {email}.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid sm:grid-cols-2 gap-3">
-            <input
-              type="text"
-              required
-              minLength={2}
-              placeholder="Full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClass}
-              aria-label="Full name"
-            />
-            <input
-              type="email"
-              required
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-              aria-label="Email address"
-            />
-          </div>
-          <input
-            type="tel"
-            placeholder="Phone (optional)"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className={inputClass}
-            aria-label="Phone number (optional)"
-          />
-
-          {error && (
-            <p className="font-body text-sm text-red-400">{error}</p>
+      {/* 3. Specs / Pricing */}
+      <motion.div
+        custom={2}
+        initial="hidden"
+        animate="visible"
+        variants={contentVariants}
+        className="relative pl-6 pr-2 py-4 mb-6 border-l-4 border-amber bg-amber/5 rounded-r-xl"
+      >
+        <p className="font-display text-sm font-semibold text-navy/90 dark:text-cream/90">
+          {event.type === "PAID" ? (
+            <span>Admission: <strong className="text-amber">KES {event.priceKes.toLocaleString()}</strong> (M-Pesa payment required)</span>
+          ) : (
+            <span>Admission: <strong className="text-amber">FREE RSVP</strong></span>
           )}
+        </p>
+        <p className={`font-body text-xs mt-1 ${dark ? "text-cream/55" : "text-navy/55"}`}>
+          Starts at {new Date(event.startsAt).toLocaleTimeString("en-KE", { hour: "numeric", minute: "2-digit" })}
+        </p>
+      </motion.div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-            <motion.button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-body text-sm font-semibold tracking-wide bg-amber text-teal hover:bg-gold transition-colors cursor-pointer disabled:opacity-50"
-              whileTap={{ scale: 0.95 }}
+      {/* 4. RSVP Form */}
+      <motion.div custom={3} initial="hidden" animate="visible" variants={contentVariants}>
+        {done ? (
+          <div className="flex items-start gap-3 rounded-xl bg-green-500/10 px-4 py-4">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-green-400 shrink-0 mt-0.5"
             >
-              {loading ? "Registering..." : "Register Now"}
-            </motion.button>
-            {event.spotsRemaining !== null && (
-              <span className={`font-body text-sm ${dark ? "text-cream/40" : "text-navy/40"}`}>
-                {event.spotsRemaining} spots left
-              </span>
-            )}
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <div>
+              <p className="font-body text-sm font-semibold text-green-400">
+                You&rsquo;re registered!
+              </p>
+              <p className={`font-body text-sm ${dark ? "text-cream/60" : "text-navy/60"}`}>
+                We&rsquo;ve saved your spot for {event.title}. A confirmation will be sent to {email}.
+              </p>
+            </div>
           </div>
-        </form>
-      )}
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                required
+                minLength={2}
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClass}
+                aria-label="Full name"
+              />
+              <input
+                type="email"
+                required
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                aria-label="Email address"
+              />
+            </div>
+            <input
+              type="tel"
+              required={event.type === "PAID"}
+              placeholder={event.type === "PAID" ? "M-Pesa Phone (07XXXXXXXX)" : "Phone number (optional)"}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={inputClass}
+              aria-label="Phone number"
+            />
+
+            {error && (
+              <p className="font-body text-sm text-red-400">{error}</p>
+            )}
+
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 rounded-full font-body text-sm font-semibold tracking-wide bg-amber text-teal hover:bg-gold transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {loading ? "Processing..." : event.type === "PAID" ? "Pay & Register" : "Register Now"}
+              </button>
+              {event.spotsRemaining !== null && (
+                <span className={`font-body text-xs font-semibold tracking-wide uppercase ${
+                  event.spotsRemaining <= 10 ? "text-red-400" : "text-amber"
+                }`}>
+                  {event.spotsRemaining} spots left
+                </span>
+              )}
+            </div>
+          </form>
+        )}
+      </motion.div>
     </div>
   );
 }
@@ -280,17 +346,25 @@ export default function Events() {
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
+  const [selectedEvent, setSelectedEvent] = useState<ApiEvent | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
-  const [selectedEvent, setSelectedEvent] = useState<ApiEvent | null>(null);
 
   // Fetch events from API
   useEffect(() => {
     fetch("/api/events")
       .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch(console.error);
+      .then((data) => {
+        setEvents(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
   const nextEvent = useMemo(() => {
@@ -319,7 +393,7 @@ export default function Events() {
       .catch(console.error);
   }, []);
 
-  if (events.length === 0) {
+  if (loading) {
     return (
       <section
         className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${
@@ -342,34 +416,34 @@ export default function Events() {
         dark ? "bg-teal" : "bg-cream"
       }`}
     >
-      <AnimatedBg variant="grid" surface={dark ? "teal" : "cream"} />
+      <AnimatedBg variant="circles" surface={dark ? "teal" : "cream"} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Header */}
-        <Reveal>
-          <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4 text-center">
-            Events
-          </p>
-          <h2
-            className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold text-center mb-4 ${
+        {/* Main Heading - Leadership-like display header */}
+        <Reveal y={40}>
+          <h1 className="font-accent text-amber text-5xl sm:text-7xl md:text-8xl font-bold text-center mb-4 tracking-wide">
+            Calendar
+          </h1>
+          <p
+            className={`font-display text-xl sm:text-3xl text-center font-medium mb-6 ${
               dark ? "text-cream" : "text-navy"
             }`}
           >
-            What We <span className="text-amber">Do</span>
-          </h2>
+            Club <span className="text-amber">Events</span>
+          </p>
           <p
-            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-10 ${
+            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-12 sm:mb-20 ${
               dark ? "text-cream/60" : "text-navy/75"
             }`}
           >
-            From workshops to competitions, every event is designed to stretch
-            your thinking and build real skills.
+            From flagship summits to hands-on bootcamps, every event is designed
+            to expand your creative horizons. Click anyone to learn more.
           </p>
         </Reveal>
 
-        {/* Countdown + Marquee */}
+        {/* Countdown & Marquee */}
         {nextEvent && (
-          <Reveal delay={0.1}>
+          <Reveal y={40} delay={0.1}>
             <div className="mb-8 sm:mb-10 max-w-md mx-auto sm:mx-0">
               <Countdown targetDate={nextEvent.startsAt} label={nextEvent.title} />
             </div>
@@ -378,8 +452,15 @@ export default function Events() {
         )}
 
         {/* Filter tabs */}
-        <Reveal delay={0.15}>
-          <div className="flex flex-wrap gap-2 mt-8 sm:mt-10 mb-6 sm:mb-8">
+        <Reveal y={40} delay={0.15}>
+          <div className="flex items-center gap-4 mt-12 mb-6">
+            <h3 className={`font-display text-base sm:text-lg font-bold uppercase tracking-wider ${dark ? "text-amber" : "text-gold"}`}>
+              Event Categories
+            </h3>
+            <div className={`h-[1px] flex-1 ${dark ? "bg-cream/10" : "bg-navy/10"}`} />
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-8">
             {filterTags.map((tag) => (
               <button
                 key={tag}
@@ -398,111 +479,101 @@ export default function Events() {
           </div>
         </Reveal>
 
-        {/* Event cards grid */}
-        <motion.div layout className="grid md:grid-cols-2 gap-4 sm:gap-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((event) => (
-              <motion.div
-                key={event.id}
-                layout
-                initial={
-                  prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }
-                }
-                animate={{ opacity: 1, scale: 1 }}
-                exit={
-                  prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }
-                }
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              >
+        {/* Event cards grid - styled like Team layout */}
+        <StaggerContainer
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          stagger={0.08}
+        >
+          {filtered.map((event) => {
+            const colors = getGradientForCategory(event.category);
+            const hasFlyer = !!event.imageUrl;
+
+            return (
+              <StaggerItem key={event.id} y={40}>
                 <ClickableCard
                   onClick={() => setSelectedEvent(event)}
                   cue="View details"
-                  className={dark ? "bg-navy/60" : "bg-white shadow-sm"}
+                  className="transition-all duration-300 hover:shadow-[0_16px_32px_rgba(255,168,41,0.08)] dark:hover:shadow-[0_16px_32px_rgba(255,168,41,0.15)]"
                 >
-                  <div className="p-5 sm:p-7">
-                    {/* Tag + spots badge */}
-                    <div className="flex items-center justify-between mb-4">
-                      <motion.span
-                        className="inline-block font-body text-xs font-semibold tracking-widest uppercase bg-amber/10 text-amber px-3 py-1 rounded-full group-hover:bg-amber/20 transition-colors"
-                        whileHover={prefersReduced ? {} : { scale: 1.05 }}
-                      >
-                        {event.category}
-                      </motion.span>
-                      <div className="flex items-center gap-2">
-                        {event.type === "PAID" && (
-                          <span className="font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-amber/10 text-amber">
-                            KES {event.priceKes}
-                          </span>
-                        )}
-                        {event.spotsRemaining !== null && (
-                          <span
-                            className={`font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full ${
-                              event.spotsRemaining <= 10
-                                ? "bg-red-500/10 text-red-400"
-                                : "bg-green-500/10 text-green-400"
-                            }`}
-                          >
-                            {event.spotsRemaining} spots
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  <div
+                    className="p-6 sm:p-8 text-center"
+                    onMouseEnter={() => setHoveredId(event.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                  >
+                    {/* Event Flyer / Icon representation */}
+                    <motion.div
+                      className="mx-auto mb-5 w-fit relative"
+                      whileHover={
+                        prefersReduced ? {} : { scale: 1.06, transition: { duration: 0.2 } }
+                      }
+                    >
+                      {/* Glow backdrop */}
+                      {!prefersReduced && (
+                        <div
+                          className={`absolute inset-0 rounded-2xl blur-md opacity-0 transition-opacity duration-300 pointer-events-none ${
+                            hoveredId === event.id ? "opacity-45" : ""
+                          }`}
+                          style={{
+                            background: hasFlyer
+                              ? `radial-gradient(circle, rgba(255,168,41,0.6) 0%, rgba(204,136,2,0.4) 100%)`
+                              : `radial-gradient(circle, ${colors[0]} 0%, ${colors[1]} 100%)`,
+                            transform: "scale(1.1)",
+                          }}
+                        />
+                      )}
 
-                    <h3
-                      className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
+                      {hasFlyer ? (
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-md">
+                          <img
+                            src={event.imageUrl!}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center text-white font-display font-bold text-3xl sm:text-4xl shadow-md border border-white/20 dark:border-white/10 select-none"
+                          style={{
+                            backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+                          }}
+                        >
+                          {event.title.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </motion.div>
+
+                    <h4
+                      className={`font-display text-sm sm:text-base font-bold mb-1.5 line-clamp-1 ${
                         dark ? "text-cream" : "text-navy"
                       }`}
                     >
                       {event.title}
-                    </h3>
-                    <p
-                      className={`font-body text-sm font-medium mb-3 ${
-                        dark ? "text-cream/40" : "text-navy/40"
-                      }`}
-                    >
-                      {new Date(event.startsAt).toLocaleDateString("en-KE", {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <p
-                      className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
-                        dark ? "text-cream/65" : "text-navy/80"
-                      }`}
-                    >
-                      {event.description}
+                    </h4>
+                    <p className="font-body text-xs font-semibold text-amber mb-1.5 uppercase tracking-wide">
+                      {event.category}
                     </p>
 
-                    {/* Location row */}
-                    <div
-                      className={`flex flex-wrap gap-x-4 gap-y-1 font-body text-xs ${
-                        dark ? "text-cream/30" : "text-navy/30"
-                      }`}
-                    >
-                      <span className="flex items-center gap-1">
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                        {event.location}
-                      </span>
+                    <div className={`font-body text-[11px] leading-relaxed space-y-0.5 ${
+                      dark ? "text-cream/50" : "text-navy/60"
+                    }`}>
+                      <p>
+                        📅 {new Date(event.startsAt).toLocaleDateString("en-KE", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p>📍 {event.location}</p>
+                      <p className="font-semibold text-amber/90 mt-1">
+                        {event.type === "PAID" ? `KES ${event.priceKes.toLocaleString()}` : "FREE RSVP"}
+                      </p>
                     </div>
                   </div>
                 </ClickableCard>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+              </StaggerItem>
+            );
+          })}
+        </StaggerContainer>
 
         {/* Empty state */}
         <AnimatePresence>

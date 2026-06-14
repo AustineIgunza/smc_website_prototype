@@ -37,7 +37,7 @@ export async function POST(
 
   const { data: event } = await db
     .from("Event")
-    .select("id, status, type, capacity, registrations(id, status)")
+    .select("id, status, type, capacity, Registration(id, status)")
     .eq("slug", slug)
     .single();
 
@@ -49,7 +49,7 @@ export async function POST(
     return Response.json({ error: "This is a paid event. Use the payment flow." }, { status: 400 });
   }
 
-  const activeCount = (event.registrations as { status: string }[]).filter(
+  const activeCount = ((event.Registration as { status: string }[] | null) ?? []).filter(
     (r) => r.status !== "CANCELLED",
   ).length;
 

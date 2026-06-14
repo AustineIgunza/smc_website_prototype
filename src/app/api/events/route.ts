@@ -12,14 +12,14 @@ export async function GET() {
 
   const { data: events } = await db
     .from("Event")
-    .select("*, registrations(id, status)")
+    .select("*, Registration(id, status)")
     .eq("status", "PUBLISHED")
     .order("startsAt", { ascending: true });
 
   if (!events) return Response.json([]);
 
   const mapped = events.map((e) => {
-    const activeCount = (e.registrations as { status: string }[]).filter(
+    const activeCount = ((e.Registration as { status: string }[] | null) ?? []).filter(
       (r) => r.status !== "CANCELLED",
     ).length;
     return {
@@ -35,6 +35,7 @@ export async function GET() {
       startsAt: e.startsAt,
       location: e.location,
       ownerType: e.ownerType,
+      imageUrl: e.imageUrl,
     };
   });
 

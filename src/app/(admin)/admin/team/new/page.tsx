@@ -30,12 +30,12 @@ export default function NewTeamMemberPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-2xl mx-auto">
-      <div className="mb-8">
+      <div className="mb-8 pb-6 border-b border-cream/10">
         <Link href="/admin/team" className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors">
           ← Executive Team
         </Link>
-        <h1 className="font-display text-2xl font-bold text-cream mt-3">New Team Member</h1>
-        <p className="font-body text-cream/40 text-sm mt-1">Fill in the sections below to add a member to the club leadership.</p>
+        <h1 className="font-accent text-amber text-3xl sm:text-4xl font-bold tracking-wide mt-3">New Team Member</h1>
+        <p className="font-body text-cream/40 text-sm mt-1.5">Fill in the sections below to add a member to the club leadership.</p>
       </div>
       <TeamForm onSubmit={handleCreate} submitLabel="Create Profile" />
     </div>

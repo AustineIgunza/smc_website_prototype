@@ -249,28 +249,37 @@ export default function Portfolio() {
         dark ? "bg-teal" : "bg-cream"
       }`}
     >
-      <AnimatedBg variant="diagonals" surface={dark ? "teal" : "cream"} />
+      <AnimatedBg variant="circles" surface={dark ? "teal" : "cream"} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        <Reveal>
-          <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4 text-center">
+        <Reveal y={40}>
+          <h1 className="font-accent text-amber text-5xl sm:text-7xl md:text-8xl font-bold text-center mb-4 tracking-wide">
             Portfolio
-          </p>
-          <h2
-            className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold text-center mb-4 ${
+          </h1>
+          <p
+            className={`font-display text-xl sm:text-3xl text-center font-medium mb-6 ${
               dark ? "text-cream" : "text-navy"
             }`}
           >
             Our <span className="text-amber">Work</span>
-          </h2>
+          </p>
           <p
-            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-10 ${
+            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-12 sm:mb-20 ${
               dark ? "text-cream/60" : "text-navy/75"
             }`}
           >
             Real projects. Real brands. Real results. Click any project to see
             the full case study.
           </p>
+        </Reveal>
+
+        <Reveal y={40} delay={0.15}>
+          <div className="flex items-center gap-4 mt-12 mb-6">
+            <h3 className={`font-display text-base sm:text-lg font-bold uppercase tracking-wider ${dark ? "text-amber" : "text-gold"}`}>
+              Project Categories
+            </h3>
+            <div className={`h-[1px] flex-1 ${dark ? "bg-cream/10" : "bg-navy/10"}`} />
+          </div>
         </Reveal>
 
         {/* Category filter tabs */}
@@ -307,60 +316,74 @@ export default function Portfolio() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               >
                 <ClickableCard onClick={() => setSelected(p)} cue="View case study">
-                  {/* Cover image */}
-                  {p.coverImageUrl && (
-                    <div
-                      className="w-full h-36 rounded-t-xl bg-cover bg-center"
-                      style={{ backgroundImage: `url(${p.coverImageUrl})` }}
-                    />
-                  )}
+                  <div className="p-6 sm:p-8 text-center flex flex-col justify-between h-full">
+                    <div>
+                      {/* Cover image or fallback */}
+                      <div className="mx-auto mb-5 w-fit relative">
+                        {p.coverImageUrl ? (
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-md transition-transform duration-300 group-hover:scale-105">
+                            <img
+                              src={p.coverImageUrl}
+                              alt={p.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-cream/5 border border-white/20 dark:border-white/10 flex items-center justify-center select-none transition-transform duration-300 group-hover:scale-105">
+                            <span className="font-display text-2xl text-cream/20 font-bold">
+                              {p.title.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-                  <div className="p-5 sm:p-7">
-                    {/* Category + featured */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span
-                        className={`font-body text-xs font-semibold tracking-widest uppercase ${
-                          dark ? "text-gold" : "text-amber"
+                      {/* Category + featured */}
+                      <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+                        <span
+                          className={`font-body text-[10px] font-semibold tracking-widest uppercase ${
+                            dark ? "text-gold" : "text-amber"
+                          }`}
+                        >
+                          {p.category}
+                        </span>
+                        {p.featured && (
+                          <span className="text-amber text-[10px] uppercase font-semibold tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
+                            ★ Featured
+                          </span>
+                        )}
+                      </div>
+
+                      <h3
+                        className={`font-display text-sm sm:text-base font-bold mb-2 line-clamp-1 group-hover:text-amber transition-colors ${
+                          dark ? "text-cream" : "text-navy"
                         }`}
                       >
-                        {p.category}
-                      </span>
-                      {p.featured && (
-                        <span className="text-amber text-xs">★</span>
-                      )}
+                        {p.title}
+                      </h3>
+
+                      <p
+                        className={`font-body text-xs leading-relaxed mb-4 line-clamp-2 ${
+                          dark ? "text-cream/60" : "text-navy/75"
+                        }`}
+                      >
+                        {p.desc}
+                      </p>
                     </div>
 
-                    <h3
-                      className={`font-display text-base sm:text-lg font-bold mb-2 sm:mb-3 leading-snug ${
-                        dark ? "text-cream" : "text-navy"
-                      }`}
-                    >
-                      {p.title}
-                    </h3>
-
-                    {p.clientName && (
-                      <p className={`font-body text-xs mb-2 ${dark ? "text-cream/40" : "text-navy/50"}`}>
-                        {p.clientName}
-                      </p>
-                    )}
-
-                    <p
-                      className={`font-body text-sm leading-relaxed mb-4 ${
-                        dark ? "text-cream/60" : "text-navy/75"
-                      }`}
-                    >
-                      {p.desc}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1.5">
-                      {(p.metrics ?? []).slice(0, 2).map((m) => (
-                        <span
-                          key={m}
-                          className="font-body text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber/10 text-amber"
-                        >
-                          {m}
-                        </span>
-                      ))}
+                    {/* Footer / Info */}
+                    <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
+                      {p.clientName && <p>Client: {p.clientName}</p>}
+                      <p>Duration: {p.duration}</p>
+                      <div className="flex flex-wrap justify-center gap-1.5 pt-2 mt-1">
+                        {(p.metrics ?? []).slice(0, 2).map((m) => (
+                          <span
+                            key={m}
+                            className="font-body text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/15"
+                          >
+                            {m}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </ClickableCard>

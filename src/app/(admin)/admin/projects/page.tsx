@@ -41,9 +41,9 @@ export default async function AdminProjectsPage({
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-end justify-between gap-4 mb-8 pb-6 border-b border-cream/10">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-cream">
+          <h1 className="font-accent text-amber text-4xl sm:text-5xl font-bold tracking-wide">
             Portfolio Projects
           </h1>
           <p className="font-body text-cream/40 text-sm mt-1">
@@ -103,60 +103,86 @@ export default async function AdminProjectsPage({
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map((p) => (
-            <Link
-              key={p.id}
-              href={`/admin/projects/${p.id}`}
-              className="group flex items-center gap-4 p-4 rounded-xl bg-navy/60 border border-cream/5 hover:border-cream/15 hover:bg-navy/80 transition-all"
-            >
-              {/* Cover image thumbnail */}
-              {p.coverImageUrl ? (
-                <div
-                  className="hidden sm:block w-12 h-12 rounded-lg bg-cover bg-center flex-shrink-0 border border-cream/10"
-                  style={{ backgroundImage: `url(${p.coverImageUrl})` }}
-                />
-              ) : (
-                <div className="hidden sm:flex w-12 h-12 rounded-lg bg-cream/5 border border-cream/10 flex-shrink-0 items-center justify-center">
-                  <span className="font-display text-lg text-cream/20 font-bold">
-                    {p.title.charAt(0)}
-                  </span>
-                </div>
-              )}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {filtered.map((p) => {
+            const hasCover = !!p.coverImageUrl;
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-display font-bold text-cream text-sm group-hover:text-amber transition-colors truncate">
+            return (
+              <Link
+                key={p.id}
+                href={`/admin/projects/${p.id}`}
+                className="group flex flex-col p-6 sm:p-8 rounded-2xl bg-navy/60 border border-cream/10 hover:border-amber/40 hover:bg-navy/80 hover:shadow-[0_16px_32px_rgba(255,168,41,0.08)] transition-all duration-300 text-center justify-between"
+              >
+                <div>
+                  {/* Cover thumbnail or fallback */}
+                  <div className="mx-auto mb-5 w-fit relative">
+                    {hasCover ? (
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-md transition-transform duration-300 group-hover:scale-105">
+                        <img
+                          src={p.coverImageUrl!}
+                          alt={p.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-cream/5 border border-white/20 dark:border-white/10 flex items-center justify-center select-none transition-transform duration-300 group-hover:scale-105">
+                        <span className="font-display text-2xl text-cream/20 font-bold">
+                          {p.title.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Badges Row */}
+                  <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+                    <span className="font-body text-[9px] uppercase font-semibold text-amber/80 tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
+                      {p.category}
+                    </span>
+                    <span
+                      className={`font-body text-[9px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded border ${
+                        p.status === "PUBLISHED"
+                          ? "text-green-400 bg-green-500/5 border-green-500/10"
+                          : "text-cream/40 bg-cream/5 border-cream/10"
+                      }`}
+                    >
+                      {p.status}
+                    </span>
+                    {p.featured && (
+                      <span className="font-body text-[9px] uppercase font-semibold tracking-wider text-amber bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
+                        ★ Featured
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="font-display text-sm sm:text-base font-bold mb-2 line-clamp-1 text-cream group-hover:text-amber transition-colors">
                     {p.title}
+                  </h4>
+
+                  <p className="font-body text-cream/45 text-xs line-clamp-2 mb-4 leading-relaxed">
+                    {p.desc}
                   </p>
-                  {p.featured && (
-                    <span className="text-amber text-xs">★</span>
+                </div>
+
+                {/* Footer details */}
+                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
+                  {p.clientName && <p>👤 Client: {p.clientName}</p>}
+                  <p>⏱️ Duration: {p.duration}</p>
+                  {p.tags && p.tags.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-1 mt-2">
+                      {p.tags.slice(0, 2).map((t: string) => (
+                        <span
+                          key={t}
+                          className="font-body text-[8px] font-medium tracking-wide px-2 py-0.5 rounded bg-cream/5 text-cream/40 border border-cream/10"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
-                <p className="font-body text-cream/40 text-xs mt-0.5">
-                  {p.category}
-                  {p.clientName && ` · ${p.clientName}`}
-                  {` · ${p.duration}`}
-                </p>
-              </div>
-
-              {/* Status */}
-              <span
-                className={`flex-shrink-0 font-body text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  p.status === "PUBLISHED"
-                    ? "bg-green-500/15 text-green-400"
-                    : "bg-cream/10 text-cream/40"
-                }`}
-              >
-                {p.status}
-              </span>
-
-              <span className="font-body text-cream/20 text-xs hidden sm:block group-hover:text-cream/40 transition-colors">
-                Edit →
-              </span>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

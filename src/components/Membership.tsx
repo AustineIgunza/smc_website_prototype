@@ -17,7 +17,11 @@ function BenefitDetail({ benefit }: { benefit: Benefit }) {
 
   return (
     <div className="pr-4">
-      <span className="text-4xl mb-4 block">{benefit.icon}</span>
+      <div className="mx-auto sm:mx-0 w-fit mb-5">
+        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center text-4xl select-none shadow-md">
+          {benefit.icon}
+        </div>
+      </div>
       <h3
         className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
           dark ? "text-cream" : "text-navy"
@@ -81,31 +85,40 @@ export default function Membership() {
     <section
       id="membership"
       className={`relative overflow-hidden pt-20 sm:pt-32 pb-12 sm:pb-24 ${
-        dark ? "bg-navy" : "bg-cream"
+        dark ? "bg-teal" : "bg-cream"
       }`}
     >
-      <AnimatedBg variant="mesh" surface={dark ? "navy" : "cream"} />
+      <AnimatedBg variant="circles" surface={dark ? "teal" : "cream"} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        <Reveal>
-          <p className="font-accent text-amber text-sm tracking-widest uppercase mb-4 text-center">
+        <Reveal y={40}>
+          <h1 className="font-accent text-amber text-5xl sm:text-7xl md:text-8xl font-bold text-center mb-4 tracking-wide">
             Membership
-          </p>
-          <h2
-            className={`font-display text-2xl sm:text-4xl md:text-5xl font-bold text-center mb-4 ${
+          </h1>
+          <p
+            className={`font-display text-xl sm:text-3xl text-center font-medium mb-6 ${
               dark ? "text-cream" : "text-navy"
             }`}
           >
             Why Join <span className="text-amber">SMC</span>?
-          </h2>
+          </p>
           <p
-            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-16 ${
+            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-12 sm:mb-20 ${
               dark ? "text-cream/60" : "text-navy/75"
             }`}
           >
             Membership isn&apos;t just a card &mdash; it&apos;s access to a
             launchpad that accelerates your marketing career from day one.
           </p>
+        </Reveal>
+
+        <Reveal y={40}>
+          <div className="flex items-center gap-4 mb-8">
+            <h3 className={`font-display text-base sm:text-lg font-bold uppercase tracking-wider ${dark ? "text-amber" : "text-gold"}`}>
+              Member Benefits
+            </h3>
+            <div className={`h-[1px] flex-1 ${dark ? "bg-cream/10" : "bg-navy/10"}`} />
+          </div>
         </Reveal>
 
         <StaggerContainer
@@ -115,33 +128,38 @@ export default function Membership() {
           {benefits.map((b) => (
             <StaggerItem key={b.id}>
               <ClickableCard onClick={() => setSelected(b)} cue="Learn more">
-                <div
-                  className={`p-5 sm:p-7 h-full ${
-                    dark ? "bg-teal/50" : ""
-                  }`}
-                >
-                  <motion.span
-                    className="text-2xl sm:text-3xl mb-3 sm:mb-4 block"
-                    whileHover={
-                      prefersReduced ? {} : { scale: 1.15, rotate: 5, transition: { duration: 0.25 } }
-                    }
-                  >
-                    {b.icon}
-                  </motion.span>
-                  <h3
-                    className={`font-display text-lg sm:text-xl font-bold mb-2 ${
-                      dark ? "text-cream" : "text-navy"
-                    }`}
-                  >
-                    {b.title}
-                  </h3>
-                  <p
-                    className={`font-body text-sm sm:text-base leading-relaxed ${
-                      dark ? "text-cream/60" : "text-navy/75"
-                    }`}
-                  >
-                    {b.desc}
-                  </p>
+                <div className="p-6 sm:p-8 text-center flex flex-col justify-between h-full">
+                  <div>
+                    {/* Centered Benefit Icon container */}
+                    <div className="mx-auto mb-5 w-fit relative">
+                      <motion.div
+                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center text-3xl select-none"
+                        whileHover={
+                          prefersReduced ? {} : { scale: 1.1, rotate: 5, transition: { duration: 0.2 } }
+                        }
+                      >
+                        {b.icon}
+                      </motion.div>
+                    </div>
+
+                    <h3
+                      className={`font-display text-base sm:text-lg font-bold mb-2 group-hover:text-amber transition-colors ${
+                        dark ? "text-cream" : "text-navy"
+                      }`}
+                    >
+                      {b.title}
+                    </h3>
+                    <p
+                      className={`font-body text-sm leading-relaxed ${
+                        dark ? "text-cream/60" : "text-navy/75"
+                      }`}
+                    >
+                      {b.desc}
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors">
+                    Learn more &rarr;
+                  </div>
                 </div>
               </ClickableCard>
             </StaggerItem>

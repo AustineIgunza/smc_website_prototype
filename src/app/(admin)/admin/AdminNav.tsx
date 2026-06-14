@@ -5,11 +5,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function AdminNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const { theme } = useTheme();
+  const dark = theme === "dark";
   const isLogin = pathname === "/admin/login";
 
   useEffect(() => {
@@ -29,17 +32,22 @@ export default function AdminNav() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-          ? "bg-teal/95 backdrop-blur-md shadow-lg py-2 sm:py-3"
-          : "bg-teal py-3 sm:py-5"
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? `backdrop-blur-md shadow-lg py-2 sm:py-3 ${dark ? "bg-cream/95" : "bg-teal/95"}`
+          : `py-3 sm:py-5 ${dark ? "bg-cream" : "bg-teal"}`
+      }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/admin">
-            <Logo variant="full" size={40} onDarkBg={true} />
+            <Logo variant="full" size={40} onDarkBg={!dark} />
           </Link>
-          <span className="font-body text-cream/40 text-xs font-semibold tracking-widest uppercase">
+          <span
+            className={`font-body text-xs font-semibold tracking-widest uppercase transition-colors ${
+              dark ? "text-teal/40" : "text-cream/40"
+            }`}
+          >
             Admin
           </span>
         </div>
@@ -48,7 +56,9 @@ export default function AdminNav() {
           <Link
             href="/"
             target="_blank"
-            className="hidden sm:block font-body text-sm font-medium tracking-wide text-cream/70 hover:text-cream transition-colors"
+            className={`hidden sm:block font-body text-sm font-medium tracking-wide transition-colors ${
+              dark ? "text-teal/70 hover:text-teal" : "text-cream/70 hover:text-cream"
+            }`}
           >
             View site
           </Link>

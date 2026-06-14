@@ -16,7 +16,7 @@ export async function GET(
 
   const { data: event } = await db
     .from("Event")
-    .select("*, registrations(id, status), partner:Partner(name)")
+    .select("*, Registration(id, status), partner:Partner(name)")
     .eq("slug", slug)
     .single();
 
@@ -24,7 +24,7 @@ export async function GET(
     return Response.json({ error: "Event not found" }, { status: 404 });
   }
 
-  const activeCount = (event.registrations as { status: string }[]).filter(
+  const activeCount = ((event.Registration as { status: string }[] | null) ?? []).filter(
     (r) => r.status !== "CANCELLED",
   ).length;
 
@@ -42,5 +42,6 @@ export async function GET(
     location: event.location,
     ownerType: event.ownerType,
     partnerName: (event.partner as { name: string } | null)?.name ?? null,
+    imageUrl: event.imageUrl,
   });
 }
