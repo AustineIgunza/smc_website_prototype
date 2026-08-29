@@ -58,17 +58,29 @@ function PastEventDetail({
 }) {
   const { theme } = useTheme();
   const dark = theme === "dark";
+  const colors = getCategoryGradient(event.category);
 
   return (
     <div className="space-y-6 pr-2">
       {/* 1. Header with Cover & Title */}
       <div className="relative rounded-2xl overflow-hidden border border-cream/10 bg-navy/40">
         <div className="h-48 sm:h-64 w-full relative">
-          <img
-            src={event.coverImageUrl}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
+          {event.coverImageUrl ? (
+            <img
+              src={event.coverImageUrl}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center text-white font-display font-bold text-5xl select-none"
+              style={{
+                backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+              }}
+            >
+              {event.title.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4 text-cream">
             <span className="inline-block font-body text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-amber text-teal mb-2">
@@ -503,7 +515,8 @@ export default function PastEvents() {
             stagger={0.08}
           >
             {filtered.map((event) => {
-              const photoCount = event.galleryUrls?.length || 1;
+              const colors = getCategoryGradient(event.category);
+              const photoCount = event.galleryUrls?.length || (event.coverImageUrl ? 1 : 0);
 
               return (
                 <StaggerItem key={event.id} y={40}>
@@ -514,28 +527,33 @@ export default function PastEvents() {
                   >
                     <div>
                       {/* Event Cover Photo with Overlay Badges */}
-                      <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-cream/10">
-                        <img
-                          src={event.coverImageUrl}
-                          alt={event.title}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
+                      <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-cream/10 bg-navy/80">
+                        {event.coverImageUrl ? (
+                          <img
+                            src={event.coverImageUrl}
+                            alt={event.title}
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center text-white font-display font-bold text-3xl select-none"
+                            style={{
+                              backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+                            }}
+                          >
+                            {event.title.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div className="absolute top-3 left-3">
                           <span className="font-body text-[9px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-amber text-teal shadow-md">
                             {event.category}
                           </span>
                         </div>
                         <div className="absolute bottom-3 right-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openLightboxForEvent(event, 0);
-                            }}
-                            className="flex items-center gap-1.5 bg-black/75 hover:bg-amber hover:text-teal text-white text-[10px] font-body font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm transition-colors border border-white/10 cursor-pointer"
-                          >
-                            <Images size={12} />
+                          <span className="flex items-center gap-1.5 bg-black/75 text-white text-[10px] font-body font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                            <Images size={12} className="text-amber" />
                             <span>{photoCount} Photos</span>
-                          </button>
+                          </span>
                         </div>
                       </div>
 
