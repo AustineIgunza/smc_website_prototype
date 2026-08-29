@@ -109,6 +109,34 @@ async function main() {
 
   console.log(`Created ${events.length} events`);
 
+  // Seed Past Events
+  const { pastEventsData } = await import("../../data/pastEvents");
+  for (const pe of pastEventsData) {
+    await (prisma as any).pastEvent.upsert({
+      where: { slug: pe.slug },
+      update: {},
+      create: {
+        slug: pe.slug,
+        title: pe.title,
+        description: pe.description,
+        category: pe.category,
+        date: new Date(pe.date),
+        location: pe.location,
+        attendanceCount: pe.attendanceCount,
+        coverImageUrl: pe.coverImageUrl,
+        galleryUrls: pe.galleryUrls,
+        highlights: pe.highlights,
+        keyTakeaways: pe.keyTakeaways,
+        speakers: pe.speakers,
+        partnerName: pe.partnerName || null,
+        testimonial: pe.testimonial || null,
+        testimonialAuthor: pe.testimonialAuthor || null,
+        status: pe.status === "DRAFT" ? EventStatus.DRAFT : EventStatus.PUBLISHED,
+      },
+    });
+  }
+  console.log(`Created ${pastEventsData.length} past events`);
+
   // Portfolio projects
   type ProjectSeed = {
     slug: string;

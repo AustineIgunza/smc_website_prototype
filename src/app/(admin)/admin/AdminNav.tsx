@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
+import { ExternalLink } from "@/components/icons";
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -52,15 +53,67 @@ export default function AdminNav() {
           </span>
         </div>
 
+        <div className="hidden lg:flex items-center gap-6">
+          <Link
+            href="/admin/projects"
+            className={`font-body text-xs font-semibold tracking-wide transition-colors ${
+              pathname.startsWith("/admin/projects")
+                ? "text-amber"
+                : dark
+                ? "text-teal/70 hover:text-teal"
+                : "text-cream/70 hover:text-cream"
+            }`}
+          >
+            Projects
+          </Link>
+          <Link
+            href="/admin/events"
+            className={`font-body text-xs font-semibold tracking-wide transition-colors ${
+              pathname.startsWith("/admin/events")
+                ? "text-amber"
+                : dark
+                ? "text-teal/70 hover:text-teal"
+                : "text-cream/70 hover:text-cream"
+            }`}
+          >
+            Upcoming Events
+          </Link>
+          <Link
+            href="/admin/past-events"
+            className={`font-body text-xs font-semibold tracking-wide transition-colors ${
+              pathname.startsWith("/admin/past-events")
+                ? "text-amber"
+                : dark
+                ? "text-teal/70 hover:text-teal"
+                : "text-cream/70 hover:text-cream"
+            }`}
+          >
+            Past Events
+          </Link>
+          <Link
+            href="/admin/team"
+            className={`font-body text-xs font-semibold tracking-wide transition-colors ${
+              pathname.startsWith("/admin/team")
+                ? "text-amber"
+                : dark
+                ? "text-teal/70 hover:text-teal"
+                : "text-cream/70 hover:text-cream"
+            }`}
+          >
+            Team
+          </Link>
+        </div>
+
         <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/"
             target="_blank"
-            className={`hidden sm:block font-body text-sm font-medium tracking-wide transition-colors ${
+            className={`hidden sm:flex items-center gap-1.5 font-body text-xs font-medium tracking-wide transition-colors ${
               dark ? "text-teal/70 hover:text-teal" : "text-cream/70 hover:text-cream"
             }`}
           >
-            View site
+            <span>View site</span>
+            <ExternalLink size={13} />
           </Link>
           <button
             onClick={handleSignOut}
