@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { FormEvent } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Reveal from "./ui/Reveal";
 import { StaggerContainer, StaggerItem } from "./ui/Reveal";
@@ -10,6 +11,13 @@ import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import Countdown from "./ui/Countdown";
 import { useTheme } from "./ThemeProvider";
+import { Calendar, MapPin, CheckCircle2, Clock } from "./icons";
+
+import {
+  getCategoryGradient,
+  getCategoryBadgeStyle,
+  EVENT_CATEGORIES,
+} from "@/data/eventCategories";
 
 /* ── Types ──────────────────────────────────────────────── */
 interface ApiEvent {
@@ -27,24 +35,6 @@ interface ApiEvent {
   ownerType: string;
   imageUrl: string | null;
 }
-
-const filterTags = ["All", "Flagship", "Workshop", "Networking", "Competition"] as const;
-type FilterTag = (typeof filterTags)[number];
-
-const getGradientForCategory = (category: string) => {
-  switch (category.toLowerCase()) {
-    case "flagship":
-      return ["#FFA829", "#CC8802"];
-    case "workshop":
-      return ["#6366f1", "#8b5cf6"];
-    case "networking":
-      return ["#059669", "#10b981"];
-    case "competition":
-      return ["#ec4899", "#f43f5e"];
-    default:
-      return ["#013953", "#00313F"];
-  }
-};
 
 /* ── Content staggers animation variables for modal ──── */
 const contentVariants = {
@@ -114,7 +104,7 @@ function EventDetail({
     }
   };
 
-  const colors = getGradientForCategory(event.category);
+  const colors = getCategoryGradient(event.category);
   const hasFlyer = !!event.imageUrl;
 
   return (
@@ -154,11 +144,17 @@ function EventDetail({
           >
             {event.title}
           </h3>
-          <p className={`font-body text-xs ${dark ? "text-cream/50" : "text-navy/60"} flex flex-wrap gap-x-2 justify-center sm:justify-start mt-1`}>
-            <span>📍 {event.location}</span>
-            <span>&middot;</span>
-            <span>📅 {new Date(event.startsAt).toLocaleDateString("en-KE", { weekday: "short", month: "short", day: "numeric" })}</span>
-          </p>
+          <div className={`font-body text-xs ${dark ? "text-cream/50" : "text-navy/60"} flex flex-wrap items-center gap-x-3 gap-y-1 justify-center sm:justify-start mt-1.5`}>
+            <span className="inline-flex items-center gap-1">
+              <MapPin size={13} className="text-amber shrink-0" />
+              <span>{event.location}</span>
+            </span>
+            <span className="text-cream/20 dark:text-cream/20">&middot;</span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar size={13} className="text-amber shrink-0" />
+              <span>{new Date(event.startsAt).toLocaleDateString("en-KE", { weekday: "short", month: "short", day: "numeric" })}</span>
+            </span>
+          </div>
         </div>
       </motion.div>
 
@@ -199,19 +195,7 @@ function EventDetail({
       <motion.div custom={3} initial="hidden" animate="visible" variants={contentVariants}>
         {done ? (
           <div className="flex items-start gap-3 rounded-xl bg-green-500/10 px-4 py-4">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-green-400 shrink-0 mt-0.5"
-            >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
+            <CheckCircle2 size={22} className="text-green-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-body text-sm font-semibold text-green-400">
                 You&rsquo;re registered!
@@ -351,7 +335,20 @@ export default function Events() {
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
+  const [activeFilter, setActiveFilter] = useState<string>("All");
+
+  const filterCategories = useMemo(() => {
+    const categoriesFromEvents = Array.from(
+      new Set(events.map((e) => e.category).filter(Boolean))
+    );
+    return Array.from(
+      new Set([
+        "All",
+        ...categoriesFromEvents,
+        ...EVENT_CATEGORIES.map((c) => c.label),
+      ])
+    );
+  }, [events]);
 
   // Fetch events from API
   useEffect(() => {
@@ -419,6 +416,33 @@ export default function Events() {
       <AnimatedBg variant="circles" surface={dark ? "teal" : "cream"} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        {/* Navigation Switcher Tabs */}
+        <Reveal y={20}>
+          <div className="flex justify-center mb-8">
+            <div
+              className={`inline-flex p-1.5 rounded-full border backdrop-blur-md ${
+                dark
+                  ? "bg-navy/60 border-cream/10"
+                  : "bg-navy/5 border-navy/10"
+              }`}
+            >
+              <span className="px-5 py-2 rounded-full font-body text-xs font-semibold tracking-wide bg-amber text-teal shadow-md">
+                Upcoming Events
+              </span>
+              <Link
+                href="/events/past"
+                className={`px-5 py-2 rounded-full font-body text-xs font-semibold tracking-wide transition-all ${
+                  dark
+                    ? "text-cream/60 hover:text-cream"
+                    : "text-navy/60 hover:text-navy"
+                }`}
+              >
+                Past Events & Gallery
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+
         {/* Main Heading - Leadership-like display header */}
         <Reveal y={40}>
           <h1 className="font-accent text-amber text-5xl sm:text-7xl md:text-8xl font-bold text-center mb-4 tracking-wide">
@@ -461,7 +485,7 @@ export default function Events() {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
-            {filterTags.map((tag) => (
+            {filterCategories.map((tag) => (
               <button
                 key={tag}
                 onClick={() => setActiveFilter(tag)}
@@ -485,7 +509,7 @@ export default function Events() {
           stagger={0.08}
         >
           {filtered.map((event) => {
-            const colors = getGradientForCategory(event.category);
+            const colors = getCategoryGradient(event.category);
             const hasFlyer = !!event.imageUrl;
 
             return (
@@ -553,18 +577,24 @@ export default function Events() {
                       {event.category}
                     </p>
 
-                    <div className={`font-body text-[11px] leading-relaxed space-y-0.5 ${
+                    <div className={`font-body text-[11px] leading-relaxed space-y-1.5 ${
                       dark ? "text-cream/50" : "text-navy/60"
                     }`}>
-                      <p>
-                        📅 {new Date(event.startsAt).toLocaleDateString("en-KE", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                      <p className="flex items-center justify-center gap-1.5">
+                        <Calendar size={12} className="text-amber shrink-0" />
+                        <span>
+                          {new Date(event.startsAt).toLocaleDateString("en-KE", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
                       </p>
-                      <p>📍 {event.location}</p>
-                      <p className="font-semibold text-amber/90 mt-1">
+                      <p className="flex items-center justify-center gap-1.5">
+                        <MapPin size={12} className="text-amber shrink-0" />
+                        <span className="truncate">{event.location}</span>
+                      </p>
+                      <p className="font-semibold text-amber/90 pt-0.5">
                         {event.type === "PAID" ? `KES ${event.priceKes.toLocaleString()}` : "FREE RSVP"}
                       </p>
                     </div>
