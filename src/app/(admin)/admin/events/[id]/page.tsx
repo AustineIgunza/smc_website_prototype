@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import EditEventClient from "./EditEventClient";
+import { ArrowLeft } from "@/components/icons";
 
 export default async function EditEventPage({
   params,
@@ -38,9 +39,10 @@ export default async function EditEventPage({
       <div className="mb-8 pb-6 border-b border-cream/10">
         <Link
           href="/admin/events"
-          className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors"
+          className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors inline-flex items-center gap-1.5"
         >
-          ← Club Events
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Club Events</span>
         </Link>
         <div className="flex items-center gap-3 mt-3">
           <h1 className="font-accent text-amber text-3xl sm:text-4xl font-bold tracking-wide">Edit Event</h1>

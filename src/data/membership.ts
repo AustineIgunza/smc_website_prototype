@@ -1,6 +1,6 @@
 export interface Benefit {
   id: string;
-  icon: string;
+  iconName: string;
   title: string;
   desc: string;
   longDesc: string;
@@ -10,11 +10,11 @@ export interface Benefit {
 export const benefits: Benefit[] = [
   {
     id: "live-campaigns",
-    icon: "\ud83c\udfaf",
+    iconName: "target",
     title: "Live Campaigns",
-    desc: "Work on real briefs from real brands \u2014 build a portfolio that speaks for itself.",
+    desc: "Work on real briefs from real brands — build a portfolio that speaks for itself.",
     longDesc:
-      "As an SMC member, you get to work on live marketing briefs from partner brands and organisations. These aren't classroom simulations \u2014 they're real projects with real stakeholders, real deadlines, and real impact. Past campaigns have included social media takeovers, brand identity projects, market research studies, and event marketing initiatives. Every project you complete becomes a portfolio piece you can show to future employers.",
+      "As an SMC member, you get to work on live marketing briefs from partner brands and organisations. These aren't classroom simulations — they're real projects with real stakeholders, real deadlines, and real impact. Past campaigns have included social media takeovers, brand identity projects, market research studies, and event marketing initiatives. Every project you complete becomes a portfolio piece you can show to future employers.",
     highlights: [
       "Work with real brands like campus businesses and Nairobi startups",
       "Build a professional portfolio before graduation",
@@ -24,11 +24,11 @@ export const benefits: Benefit[] = [
   },
   {
     id: "workshops",
-    icon: "\ud83e\udde0",
+    iconName: "brain",
     title: "Workshops & Masterclasses",
     desc: "Learn from industry professionals in branding, analytics, copywriting, and more.",
     longDesc:
-      "Our monthly workshops and masterclasses cover every facet of modern marketing \u2014 from SEO and Google Analytics to copywriting, brand strategy, and paid advertising. Sessions are led by a mix of industry professionals, alumni, and experienced senior members. Every workshop includes hands-on exercises so you leave with practical skills, not just theory. We also run specialised bootcamps during semester breaks for deep dives into specific topics.",
+      "Our monthly workshops and masterclasses cover every facet of modern marketing — from SEO and Google Analytics to copywriting, brand strategy, and paid advertising. Sessions are led by a mix of industry professionals, alumni, and experienced senior members. Every workshop includes hands-on exercises so you leave with practical skills, not just theory. We also run specialised bootcamps during semester breaks for deep dives into specific topics.",
     highlights: [
       "Monthly sessions covering digital, creative, and strategic marketing",
       "Led by industry professionals and experienced alumni",
@@ -38,7 +38,7 @@ export const benefits: Benefit[] = [
   },
   {
     id: "networking",
-    icon: "\ud83e\udd1d",
+    iconName: "handshake",
     title: "Networking",
     desc: "Connect with alumni, agency leaders, and fellow marketing enthusiasts across Kenya.",
     longDesc:
@@ -52,25 +52,25 @@ export const benefits: Benefit[] = [
   },
   {
     id: "competitions",
-    icon: "\ud83c\udfc6",
+    iconName: "trophy",
     title: "Competitions",
     desc: "Represent Strathmore in national and pan-African marketing competitions.",
     longDesc:
       "Compete against the best marketing students in Kenya and beyond. SMC regularly fields teams for national and regional marketing competitions, where you'll tackle real brand briefs under time pressure and present to panels of industry judges. Competing sharpens your strategic thinking, teamwork, and presentation skills like nothing else. Our teams have consistently placed in the top three at national competitions.",
     highlights: [
-      "National Brand Challenge \u2014 annual inter-university competition",
-      "Ad:Venture by EABL \u2014 East Africa's largest student marketing challenge",
+      "National Brand Challenge — annual inter-university competition",
+      "Ad:Venture by EABL — East Africa's largest student marketing challenge",
       "Internal pitch competitions as preparation ground",
       "Coaching and mentorship from previous competition winners",
     ],
   },
   {
     id: "career-access",
-    icon: "\ud83d\udcc8",
+    iconName: "trending-up",
     title: "Career Access",
     desc: "Exclusive internship pipelines and mentorship from marketing professionals.",
     longDesc:
-      "SMC isn't just a club \u2014 it's a career accelerator. We maintain active relationships with agencies, corporates, and startups who come to us first when they have internship and entry-level openings. Our members get priority access to these opportunities through our internal jobs board and direct referrals. The mentorship programme pairs you with a working professional who guides your career development throughout the year.",
+      "SMC isn't just a club — it's a career accelerator. We maintain active relationships with agencies, corporates, and startups who come to us first when they have internship and entry-level openings. Our members get priority access to these opportunities through our internal jobs board and direct referrals. The mentorship programme pairs you with a working professional who guides your career development throughout the year.",
     highlights: [
       "Exclusive internship listings from partner organisations",
       "1-on-1 mentorship with marketing professionals",
@@ -80,11 +80,11 @@ export const benefits: Benefit[] = [
   },
   {
     id: "creative-freedom",
-    icon: "\ud83c\udfa8",
+    iconName: "palette",
     title: "Creative Freedom",
     desc: "Pitch ideas, lead projects, and bring your creative vision to life with a team behind you.",
     longDesc:
-      "At SMC, every member has a voice. Got an idea for a content series? Pitch it. Want to organise a themed networking event? Lead it. Our flat creative culture means you don't need to wait years for a leadership role \u2014 you can propose and run projects from your very first semester. The executive team and senior members are there to support, not gatekeep. This is where you experiment, fail fast, learn faster, and build the confidence to lead.",
+      "At SMC, every member has a voice. Got an idea for a content series? Pitch it. Want to organise a themed networking event? Lead it. Our flat creative culture means you don't need to wait years for a leadership role — you can propose and run projects from your very first semester. The executive team and senior members are there to support, not gatekeep. This is where you experiment, fail fast, learn faster, and build the confidence to lead.",
     highlights: [
       "Open pitch sessions where any member can propose projects",
       "Creative committees you can join or form around your interests",

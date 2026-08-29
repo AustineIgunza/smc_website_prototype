@@ -210,3 +210,25 @@ model MembershipContent {
   updatedAt       DateTime @updatedAt
 }
 
+model PastEvent {
+  id                 String      @id @default(cuid())
+  slug               String      @unique
+  title              String
+  description        String
+  category           String
+  date               DateTime
+  location           String
+  attendanceCount    Int?
+  coverImageUrl      String?
+  galleryUrls        String[]
+  highlights         String[]
+  keyTakeaways       String[]
+  speakers           String[]
+  partnerName        String?
+  testimonial        String?
+  testimonialAuthor  String?
+  status             EventStatus @default(PUBLISHED)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+

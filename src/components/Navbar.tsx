@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import Logo from "./Logo";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
+import { Menu, X } from "@/components/icons";
 
 const links = [
   { label: "Home", href: "/" },
@@ -89,13 +90,7 @@ export default function Navbar() {
             className={`md:hidden p-2 ${dark ? "text-teal" : "text-cream"}`}
             aria-label="Toggle menu"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {mobileOpen ? (
-                <path d="M6 6l12 12M6 18L18 6" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>

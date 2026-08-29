@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import NewEventClient from "./NewEventClient";
+import { ArrowLeft } from "@/components/icons";
 
 export default async function NewEventPage() {
   const supabase = await createClient();
@@ -17,8 +18,12 @@ export default async function NewEventPage() {
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-2xl mx-auto">
       <div className="mb-8 pb-6 border-b border-cream/10">
-        <Link href="/admin/events" className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors">
-          ← Club Events
+        <Link
+          href="/admin/events"
+          className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Club Events</span>
         </Link>
         <h1 className="font-accent text-amber text-3xl sm:text-4xl font-bold tracking-wide mt-3">New Event</h1>
         <p className="font-body text-cream/40 text-sm mt-1.5">Fill in the details below to create a new free or paid event.</p>

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, FormEvent, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ImageIcon, UploadCloud, Trash2, X } from "@/components/icons";
+import { EVENT_CATEGORIES } from "@/data/eventCategories";
 
 export interface EventSubmitPayload {
   slug: string;
@@ -73,7 +75,7 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
     slug: initial?.slug ?? "",
     title: initial?.title ?? "",
     description: initial?.description ?? "",
-    category: initial?.category ?? "Workshop",
+    category: initial?.category ?? EVENT_CATEGORIES[0].id,
     type: initial?.type ?? "FREE",
     priceKes: initial?.priceKes ?? "0",
     capacity: initial?.capacity ?? "",
@@ -252,10 +254,11 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
               onChange={(e) => set("category", e.target.value)}
               className={SELECT}
             >
-              <option value="Flagship">Flagship</option>
-              <option value="Workshop">Workshop</option>
-              <option value="Networking">Networking</option>
-              <option value="Competition">Competition</option>
+              {EVENT_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -375,9 +378,7 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
                   : "border-cream/20 hover:border-cream/40 bg-cream/5"
               } ${uploading ? "pointer-events-none opacity-60" : ""}`}
             >
-              <svg className="w-8 h-8 text-cream/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375 0 01.75 0z" />
-              </svg>
+              <UploadCloud className="w-8 h-8 text-cream/30" strokeWidth={1.5} />
               <p className="font-body text-sm text-cream/50">
                 {uploading ? "Uploading…" : "Drag & drop or click to upload flyer image"}
               </p>

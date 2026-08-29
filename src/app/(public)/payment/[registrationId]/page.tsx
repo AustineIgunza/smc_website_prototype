@@ -5,6 +5,7 @@ import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedBg from "@/components/ui/AnimatedBg";
 import { useTheme } from "@/components/ThemeProvider";
+import { Check, X, Calendar, MapPin } from "@/components/icons";
 
 interface StatusData {
   registrationId: string;
@@ -184,16 +185,20 @@ export default function PaymentPage({
               <h2 className={`font-display text-lg font-bold ${dark ? "text-cream" : "text-navy"}`}>
                 {status.event.title}
               </h2>
-              <p className={`font-body text-xs mt-1.5 ${dark ? "text-cream/40" : "text-navy/50"}`}>
-                📅 {new Date(status.event.startsAt).toLocaleDateString("en-KE", {
-                  weekday: "short",
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+              <p className={`font-body text-xs mt-1.5 ${dark ? "text-cream/40" : "text-navy/50"} inline-flex items-center gap-1.5`}>
+                <Calendar size={13} className="text-amber shrink-0" />
+                <span>
+                  {new Date(status.event.startsAt).toLocaleDateString("en-KE", {
+                    weekday: "short",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
               </p>
-              <p className={`font-body text-xs mt-0.5 ${dark ? "text-cream/40" : "text-navy/50"}`}>
-                📍 {status.event.location}
+              <p className={`font-body text-xs mt-1 ${dark ? "text-cream/40" : "text-navy/50"} inline-flex items-center gap-1.5`}>
+                <MapPin size={13} className="text-amber shrink-0" />
+                <span>{status.event.location}</span>
               </p>
             </div>
 
@@ -234,9 +239,7 @@ export default function PaymentPage({
               {status.paymentStatus === "SUCCESS" && (
                 <div className="space-y-5 animate-fade-in">
                   <div className="w-12 h-12 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center mx-auto border-2 border-green-500/20">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
+                    <Check size={24} strokeWidth={3} />
                   </div>
                   <div className="space-y-1.5">
                     <p className="font-display font-bold text-green-400 text-base">
@@ -263,10 +266,7 @@ export default function PaymentPage({
               {status.paymentStatus === "FAILED" && (
                 <div className="space-y-4">
                   <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto border-2 border-red-500/20">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
+                    <X size={24} strokeWidth={3} />
                   </div>
                   <div className="space-y-1">
                     <p className="font-display font-bold text-red-400 text-sm">

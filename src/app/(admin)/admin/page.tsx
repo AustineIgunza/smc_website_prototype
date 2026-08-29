@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ArrowRight } from "@/components/icons";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -19,6 +20,8 @@ export default async function AdminDashboardPage() {
     { count: paidEvents },
     homeRow,
     membershipRow,
+    { count: totalPastEvents },
+    { count: publishedPastEvents },
   ] = await Promise.all([
     supabase.from("Project").select("*", { count: "exact", head: true }),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
@@ -31,6 +34,8 @@ export default async function AdminDashboardPage() {
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("type", "PAID"),
     supabase.from("HomeContent").select("updatedAt").eq("id", "home").maybeSingle(),
     supabase.from("MembershipContent").select("updatedAt").eq("id", "membership").maybeSingle(),
+    supabase.from("PastEvent").select("*", { count: "exact", head: true }),
+    supabase.from("PastEvent").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
   ]);
 
   const homeUpdatedLabel = homeRow.data?.updatedAt
@@ -74,10 +79,10 @@ export default async function AdminDashboardPage() {
       label: "Portfolio Projects",
       description: "Create, edit, and publish case studies.",
       stats: [
-        { value: total, label: "Total" },
-        { value: published, label: "Published" },
-        { value: draft, label: "Drafts" },
-        { value: featured, label: "Featured" },
+        { value: total ?? 0, label: "Total" },
+        { value: published ?? 0, label: "Published" },
+        { value: draft ?? 0, label: "Drafts" },
+        { value: featured ?? 0, label: "Featured" },
       ],
       cta: "Manage projects →",
     },
@@ -86,21 +91,31 @@ export default async function AdminDashboardPage() {
       label: "Executive Team",
       description: "Manage club leadership profiles and focus areas.",
       stats: [
-        { value: totalTeam, label: "Total Members" },
+        { value: totalTeam ?? 0, label: "Total Members" },
       ],
       cta: "Manage team →",
     },
     {
       href: "/admin/events",
-      label: "Club Events",
+      label: "Upcoming Events",
       description: "Create, publish, and manage registrations/payments.",
       stats: [
-        { value: totalEvents, label: "Total" },
-        { value: publishedEvents, label: "Published" },
-        { value: draftEvents, label: "Drafts" },
-        { value: paidEvents, label: "Paid" },
+        { value: totalEvents ?? 0, label: "Total" },
+        { value: publishedEvents ?? 0, label: "Published" },
+        { value: draftEvents ?? 0, label: "Drafts" },
+        { value: paidEvents ?? 0, label: "Paid" },
       ],
       cta: "Manage events →",
+    },
+    {
+      href: "/admin/past-events",
+      label: "Past Events & Gallery",
+      description: "Manage previous event recaps, takeaways, and photo albums.",
+      stats: [
+        { value: totalPastEvents ?? 0, label: "Total Archives" },
+        { value: publishedPastEvents ?? 0, label: "Published" },
+      ],
+      cta: "Manage past events →",
     },
   ];
 
@@ -154,12 +169,10 @@ export default async function AdminDashboardPage() {
             </div>
 
             <div className="pt-4 border-t border-cream/5 flex items-center justify-between">
-              <span className="font-body text-sm font-semibold text-amber/70 group-hover:text-amber transition-all duration-200 group-hover:translate-x-1">
-                {section.cta}
+              <span className="font-body text-sm font-semibold text-amber/70 group-hover:text-amber transition-all duration-200 group-hover:translate-x-1 inline-flex items-center gap-1.5">
+                <span>{section.cta}</span>
               </span>
-              <span className="font-body text-xs text-cream/20 group-hover:text-amber/40 transition-colors">
-                &rarr;
-              </span>
+              <ArrowRight size={14} className="text-cream/20 group-hover:text-amber transition-colors shrink-0" />
             </div>
           </Link>
         ))}

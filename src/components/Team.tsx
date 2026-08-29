@@ -9,6 +9,42 @@ import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import { useTheme } from "./ThemeProvider";
 import type { TeamMember } from "@/data/team";
+import {
+  LinkedInIcon,
+  XTwitterIcon,
+  InstagramIcon,
+  Globe,
+  Mail,
+} from "./icons";
+
+const getSocialLink = (platform: string, handle: string) => {
+  const cleanHandle = handle.startsWith("@") ? handle.substring(1) : handle;
+  switch (platform.toLowerCase()) {
+    case "linkedin":
+      return `https://linkedin.com/in/${cleanHandle}`;
+    case "twitter":
+    case "x":
+      return `https://twitter.com/${cleanHandle}`;
+    case "instagram":
+      return `https://instagram.com/${cleanHandle}`;
+    default:
+      return `https://google.com/search?q=${encodeURIComponent(handle)}`;
+  }
+};
+
+const getSocialIcon = (platform: string) => {
+  switch (platform.toLowerCase()) {
+    case "linkedin":
+      return <LinkedInIcon className="w-5 h-5" />;
+    case "twitter":
+    case "x":
+      return <XTwitterIcon className="w-5 h-5" />;
+    case "instagram":
+      return <InstagramIcon className="w-5 h-5" />;
+    default:
+      return <Globe size={20} />;
+  }
+};
 
 /* ── Avatar with optional profile picture ────────────── */
 function Avatar({

@@ -13,54 +13,50 @@ import {
   type MembershipContent,
   type Benefit,
 } from "@/data/membership-defaults";
+import {
+  Check,
+  ArrowRight,
+  Target,
+  Brain,
+  Handshake,
+  Trophy,
+  TrendingUp,
+  Palette,
+} from "./icons";
 
-/* ── Inline SVG Icons mapping ────────────────────────── */
-function BenefitIcon({ icon, className = "w-8 h-8 text-amber" }: { icon: string; className?: string }) {
-  switch (icon) {
+function BenefitIcon({
+  icon,
+  id,
+  size = 28,
+  className = "",
+}: {
+  icon?: string;
+  id?: string;
+  size?: number;
+  className?: string;
+}) {
+  const key = icon || id;
+  switch (key) {
+    case "live-campaigns":
     case "target":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="6" />
-          <circle cx="12" cy="12" r="2" />
-        </svg>
-      );
+      return <Target size={size} className={className} />;
+    case "workshops":
     case "brain":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      );
+      return <Brain size={size} className={className} />;
+    case "networking":
     case "handshake":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      );
+      return <Handshake size={size} className={className} />;
+    case "competitions":
     case "trophy":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 3h2zm-5 8h10M5 10c0-2 2-3 2-3h10s2 1 2 3-2 3-2 3H7s-2-1-2-3z" />
-        </svg>
-      );
+      return <Trophy size={size} className={className} />;
+    case "career-access":
     case "chart":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-        </svg>
-      );
+      return <TrendingUp size={size} className={className} />;
+    case "creative-freedom":
     case "palette":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-        </svg>
-      );
+      return <Palette size={size} className={className} />;
     default:
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="10" />
-        </svg>
-      );
+      return <Target size={size} className={className} />;
   }
 }
 
@@ -72,8 +68,8 @@ function BenefitDetail({ benefit }: { benefit: Benefit }) {
   return (
     <div className="pr-4">
       <div className="mx-auto sm:mx-0 w-fit mb-5">
-        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shadow-md">
-          <BenefitIcon icon={benefit.icon} className="w-8 h-8 text-amber" />
+        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center text-amber shadow-md">
+          <BenefitIcon icon={benefit.icon} id={benefit.id} size={32} />
         </div>
       </div>
       <h3
@@ -101,18 +97,8 @@ function BenefitDetail({ benefit }: { benefit: Benefit }) {
       <ul className="space-y-2">
         {benefit.highlights.map((h, i) => (
           <li key={i} className="flex gap-3 items-start">
-            <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFA829"
-                strokeWidth="3"
-                strokeLinecap="round"
-              >
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
+            <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0 text-amber">
+              <Check size={12} strokeWidth={3} />
             </span>
             <span
               className={`font-body text-sm leading-relaxed ${
@@ -191,12 +177,12 @@ export default function Membership({ content = DEFAULT_MEMBERSHIP_CONTENT }: { c
                     {/* Centered Benefit Icon container */}
                     <div className="mx-auto mb-5 w-fit relative">
                       <motion.div
-                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center"
+                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center text-amber select-none group-hover:bg-amber/10 group-hover:border-amber/30 transition-all duration-300"
                         whileHover={
                           prefersReduced ? {} : { scale: 1.1, rotate: 5, transition: { duration: 0.2 } }
                         }
                       >
-                        <BenefitIcon icon={b.icon} className="w-8 h-8 text-amber" />
+                        <BenefitIcon icon={b.icon} id={b.id} size={28} className="text-amber group-hover:scale-110 transition-transform duration-300" />
                       </motion.div>
                     </div>
 
@@ -215,8 +201,9 @@ export default function Membership({ content = DEFAULT_MEMBERSHIP_CONTENT }: { c
                       {b.desc}
                     </p>
                   </div>
-                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors">
-                    Learn more &rarr;
+                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors inline-flex items-center gap-1.5">
+                    <span>Learn more</span>
+                    <ArrowRight size={13} className="shrink-0" />
                   </div>
                 </div>
               </ClickableCard>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import EditProjectClient from "./EditProjectClient";
+import { ArrowLeft } from "@/components/icons";
 
 export default async function EditProjectPage({
   params,
@@ -21,9 +22,10 @@ export default async function EditProjectPage({
       <div className="mb-8 pb-6 border-b border-cream/10">
         <Link
           href="/admin/projects"
-          className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors"
+          className="font-body text-cream/40 text-sm hover:text-cream/60 transition-colors inline-flex items-center gap-1.5"
         >
-          ← Projects
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Projects</span>
         </Link>
         <div className="flex items-center gap-3 mt-3">
           <h1 className="font-accent text-amber text-3xl sm:text-4xl font-bold tracking-wide">Edit Project</h1>

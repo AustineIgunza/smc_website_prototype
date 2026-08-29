@@ -4,20 +4,29 @@ import Link from "next/link";
 import Logo from "./Logo";
 import AnimatedBg from "./ui/AnimatedBg";
 import { useTheme } from "./ThemeProvider";
+import {
+  InstagramIcon,
+  LinkedInIcon,
+  XTwitterIcon,
+  TikTokIcon,
+  ArrowUpRight,
+  ArrowUp,
+} from "./icons";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Membership", href: "/membership" },
-  { label: "Events", href: "/events" },
+  { label: "Upcoming Events", href: "/events" },
+  { label: "Past Events & Gallery", href: "/events/past" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Team", href: "/team" },
 ];
 
 const socials = [
-  { label: "Instagram", href: "#" },
-  { label: "LinkedIn", href: "#" },
-  { label: "Twitter / X", href: "#" },
-  { label: "TikTok", href: "#" },
+  { label: "Instagram", href: "#", icon: <InstagramIcon size={16} /> },
+  { label: "LinkedIn", href: "#", icon: <LinkedInIcon size={16} /> },
+  { label: "Twitter / X", href: "#", icon: <XTwitterIcon size={16} /> },
+  { label: "TikTok", href: "#", icon: <TikTokIcon size={16} /> },
 ];
 
 function scrollToTop() {
@@ -74,11 +83,12 @@ export default function Footer() {
                 <li key={s.label}>
                   <a
                     href={s.href}
-                    className="font-body text-cream/50 hover:text-amber text-sm transition-colors"
+                    className="font-body text-cream/50 hover:text-amber text-sm transition-colors flex items-center gap-2"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {s.label}
+                    <span className="text-amber/70">{s.icon}</span>
+                    <span>{s.label}</span>
                   </a>
                 </li>
               ))}
@@ -120,9 +130,10 @@ export default function Footer() {
           </p>
           <button
             onClick={scrollToTop}
-            className="font-body text-cream/30 hover:text-amber text-xs transition-colors cursor-pointer"
+            className="font-body text-cream/30 hover:text-amber text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
           >
-            Back to Top &uarr;
+            <span>Back to Top</span>
+            <ArrowUp size={12} className="shrink-0" />
           </button>
         </div>
       </div>
