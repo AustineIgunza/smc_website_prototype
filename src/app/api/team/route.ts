@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { teamMemberSchema } from "@/backend/validators/teamMember";
+import { generateUniqueTeamSlug } from "@/lib/team-slug";
 
 export async function GET() {
   const supabase = await createClient();
@@ -22,11 +23,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const id = await generateUniqueTeamSlug(supabase, parsed.data.role);
+
   const { data: member, error } = await supabase
     .from("TeamMember")
     .insert({
-      id: crypto.randomUUID(),
-      ...parsed.data,
+      id,
+      name: parsed.data.name,
+      role: parsed.data.role,
+      title: parsed.data.title,
+      course: parsed.data.course,
+      year: parsed.data.year,
+      bio: parsed.data.bio ?? "",
+      focus: parsed.data.focus ?? [],
+      quote: parsed.data.quote ?? "",
+      socials: parsed.data.socials ?? [],
+      avatarGradient: parsed.data.avatarGradient,
+      avatarUrl: parsed.data.avatarUrl || null,
       updatedAt: new Date().toISOString(),
     })
     .select()

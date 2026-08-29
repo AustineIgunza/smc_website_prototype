@@ -18,6 +18,7 @@ export default async function AdminDashboardPage() {
     { count: draftEvents },
     { count: paidEvents },
     homeRow,
+    membershipRow,
   ] = await Promise.all([
     supabase.from("Project").select("*", { count: "exact", head: true }),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
@@ -29,10 +30,19 @@ export default async function AdminDashboardPage() {
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("status", "DRAFT"),
     supabase.from("Event").select("*", { count: "exact", head: true }).eq("type", "PAID"),
     supabase.from("HomeContent").select("updatedAt").eq("id", "home").maybeSingle(),
+    supabase.from("MembershipContent").select("updatedAt").eq("id", "membership").maybeSingle(),
   ]);
 
   const homeUpdatedLabel = homeRow.data?.updatedAt
     ? `Last saved ${new Date(homeRow.data.updatedAt as string).toLocaleDateString("en-KE", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`
+    : "Not saved yet";
+
+  const membershipUpdatedLabel = membershipRow.data?.updatedAt
+    ? `Last saved ${new Date(membershipRow.data.updatedAt as string).toLocaleDateString("en-KE", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -50,6 +60,14 @@ export default async function AdminDashboardPage() {
       stats: [],
       meta: homeUpdatedLabel,
       cta: "Edit homepage →",
+    },
+    {
+      href: "/admin/membership",
+      label: "Membership Content",
+      description: "Edit membership title, subtitles, benefits list, onboarding instructions, and links.",
+      stats: [],
+      meta: membershipUpdatedLabel,
+      cta: "Edit membership →",
     },
     {
       href: "/admin/projects",

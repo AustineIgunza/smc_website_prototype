@@ -138,9 +138,9 @@ model TeamMember {
   course         String
   year           String
   bio            String
-  focus          String[]
-  quote          String
-  socials        Json
+  focus          String[] @default([])
+  quote          String?
+  socials        Json?    @default("[]")
   avatarGradient String[]
   avatarUrl      String?
   createdAt      DateTime @default(now())
@@ -194,3 +194,19 @@ model HomeContent {
 
   updatedAt DateTime @updatedAt
 }
+
+// Singleton row (id = "membership") holding all editable membership copy.
+model MembershipContent {
+  id              String   @id @default("membership")
+  title           String
+  subtitle        String
+  description     String
+  joinTitle       String
+  joinDescription String
+  joinCtaLabel    String
+  joinCtaHref     String
+  benefits        Json     // List of Benefit objects
+  joinSteps       Json     // List of onboarding Step objects
+  updatedAt       DateTime @updatedAt
+}
+

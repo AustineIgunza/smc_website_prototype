@@ -6,9 +6,9 @@ export interface TeamMember {
   course: string;
   year: string;
   bio: string;
-  focus: string[];
-  quote: string;
-  socials: { platform: string; handle: string }[];
+  focus?: string[];
+  quote?: string;
+  socials?: { platform: string; handle: string }[];
   /** Gradient colors for placeholder avatar */
   avatarGradient: [string, string];
   /** URL to profile picture in Supabase Storage */

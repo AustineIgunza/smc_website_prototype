@@ -10,9 +10,6 @@ export interface TeamMemberSubmitPayload {
   course: string;
   year: string;
   bio: string;
-  focus: string;
-  quote: string;
-  socials: { platform: string; handle: string }[];
   avatarGradient: string[];
   avatarUrl: string;
 }
@@ -24,11 +21,6 @@ export interface TeamMemberFormData {
   course: string;
   year: string;
   bio: string;
-  focus: string;
-  quote: string;
-  linkedin: string;
-  twitter: string;
-  instagram: string;
   gradientStart: string;
   gradientEnd: string;
   avatarUrl: string;
@@ -45,7 +37,7 @@ interface Props {
 /* ── Shared input classes ─────────────────────────────── */
 const INPUT =
   "w-full px-4 py-2.5 rounded-lg bg-cream/5 border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber placeholder:text-cream/25 transition-colors";
-const TEXTAREA = INPUT + " resize-y min-h-[100px]";
+const TEXTAREA = INPUT + " resize-y min-h-[120px]";
 const LABEL =
   "block font-body text-xs font-semibold text-cream/40 uppercase tracking-widest mb-1.5";
 
@@ -61,24 +53,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/* ── Pill preview ─────────────────────────────────────── */
-function PillPreview({ value }: { value: string }) {
-  const items = value.split(",").map((s) => s.trim()).filter(Boolean);
-  if (!items.length) return null;
-  return (
-    <div className="flex flex-wrap gap-1.5 mt-2">
-      {items.map((item, i) => (
-        <span
-          key={i}
-          className="font-body text-xs font-semibold px-2.5 py-1 rounded-full bg-amber/10 text-amber"
-        >
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isEdit }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,11 +64,6 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
     course: initial?.course ?? "",
     year: initial?.year ?? "",
     bio: initial?.bio ?? "",
-    focus: initial?.focus ?? "",
-    quote: initial?.quote ?? "",
-    linkedin: initial?.linkedin ?? "",
-    twitter: initial?.twitter ?? "",
-    instagram: initial?.instagram ?? "",
     gradientStart: initial?.gradientStart ?? "#FFA829",
     gradientEnd: initial?.gradientEnd ?? "#CC8802",
     avatarUrl: initial?.avatarUrl ?? "",
@@ -172,18 +141,6 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
     setLoading(true);
     setError(null);
 
-    // Build the socials array from individual handle fields
-    const socials: { platform: string; handle: string }[] = [];
-    if (form.linkedin.trim()) {
-      socials.push({ platform: "LinkedIn", handle: form.linkedin.trim() });
-    }
-    if (form.twitter.trim()) {
-      socials.push({ platform: "Twitter", handle: form.twitter.trim() });
-    }
-    if (form.instagram.trim()) {
-      socials.push({ platform: "Instagram", handle: form.instagram.trim() });
-    }
-
     const payload: TeamMemberSubmitPayload = {
       name: form.name,
       role: form.role,
@@ -191,9 +148,6 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
       course: form.course,
       year: form.year,
       bio: form.bio,
-      focus: form.focus,
-      quote: form.quote,
-      socials,
       avatarGradient: [form.gradientStart, form.gradientEnd],
       avatarUrl: form.avatarUrl,
     };
@@ -287,8 +241,8 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
         </div>
       </Section>
 
-      {/* ── Section 2: Bio & Philosophy ── */}
-      <Section title="Bio & Philosophy">
+      {/* ── Section 2: Biography ── */}
+      <Section title="Biography">
         <div>
           <label className={LABEL}>Biography</label>
           <textarea
@@ -298,32 +252,6 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
             placeholder="Describe background, achievements, and aspirations (min 10 characters)."
             className={TEXTAREA}
           />
-        </div>
-
-        <div>
-          <label className={LABEL}>Inspiring Quote</label>
-          <textarea
-            value={form.quote}
-            onChange={(e) => set("quote", e.target.value)}
-            required
-            placeholder="A quote that summarizes their approach to marketing/work (min 5 characters)."
-            className={TEXTAREA + " min-h-[72px]"}
-          />
-        </div>
-
-        <div>
-          <label className={LABEL}>
-            Focus Areas <span className="normal-case tracking-normal font-normal text-cream/30">(comma-separated)</span>
-          </label>
-          <input
-            type="text"
-            value={form.focus}
-            onChange={(e) => set("focus", e.target.value)}
-            required
-            placeholder="e.g. Strategic planning, Team leadership, Brand partnerships"
-            className={INPUT}
-          />
-          <PillPreview value={form.focus} />
         </div>
       </Section>
 
@@ -406,85 +334,41 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
         </div>
       </Section>
 
-      {/* ── Section 4: Aesthetics & Socials ── */}
-      <Section title="Aesthetics & Socials">
-        <div className="grid sm:grid-cols-2 gap-6 items-start">
-          {/* Avatar Gradient Picker */}
-          <div className="space-y-4">
-            <label className={LABEL}>Fallback Gradient Colors</label>
-            <p className="text-[10px] text-cream/30 -mt-3">Used when no profile picture is set</p>
-            <div className="flex gap-4 items-center">
-              <div>
-                <p className="text-[10px] text-cream/40 mb-1">Start Color</p>
-                <input
-                  type="color"
-                  value={form.gradientStart}
-                  onChange={(e) => set("gradientStart", e.target.value)}
-                  className="w-12 h-10 rounded bg-transparent border border-cream/20 cursor-pointer"
-                />
-              </div>
-              <div>
-                <p className="text-[10px] text-cream/40 mb-1">End Color</p>
-                <input
-                  type="color"
-                  value={form.gradientEnd}
-                  onChange={(e) => set("gradientEnd", e.target.value)}
-                  className="w-12 h-10 rounded bg-transparent border border-cream/20 cursor-pointer"
-                />
-              </div>
-              
-              {/* Live Preview Avatar */}
-              <div className="ml-auto flex flex-col items-center">
-                <p className="text-[10px] text-cream/40 mb-1">Preview</p>
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-cream font-display font-bold border border-cream/10 text-lg shadow-inner select-none transition-all duration-300"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, ${form.gradientStart}, ${form.gradientEnd})`,
-                  }}
-                >
-                  {form.name ? form.name.charAt(0).toUpperCase() : "S"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Handles */}
-          <div className="space-y-3">
-            <label className={LABEL}>Social Handles</label>
+      {/* ── Section 4: Avatar Fallback Gradient ── */}
+      <Section title="Avatar Fallback Gradient">
+        <div className="space-y-4">
+          <label className={LABEL}>Fallback Gradient Colors</label>
+          <p className="text-[10px] text-cream/30 -mt-3">Used when no profile picture is set</p>
+          <div className="flex gap-4 items-center">
             <div>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-cream/30 text-sm font-body">LinkedIn:</span>
-                <input
-                  type="text"
-                  value={form.linkedin}
-                  onChange={(e) => set("linkedin", e.target.value)}
-                  placeholder="amara-osei"
-                  className={INPUT + " pl-[80px]"}
-                />
-              </div>
+              <p className="text-[10px] text-cream/40 mb-1">Start Color</p>
+              <input
+                type="color"
+                value={form.gradientStart}
+                onChange={(e) => set("gradientStart", e.target.value)}
+                className="w-12 h-10 rounded bg-transparent border border-cream/20 cursor-pointer"
+              />
             </div>
             <div>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-cream/30 text-sm font-body">Twitter:</span>
-                <input
-                  type="text"
-                  value={form.twitter}
-                  onChange={(e) => set("twitter", e.target.value)}
-                  placeholder="@amaraosei"
-                  className={INPUT + " pl-[70px]"}
-                />
-              </div>
+              <p className="text-[10px] text-cream/40 mb-1">End Color</p>
+              <input
+                type="color"
+                value={form.gradientEnd}
+                onChange={(e) => set("gradientEnd", e.target.value)}
+                className="w-12 h-10 rounded bg-transparent border border-cream/20 cursor-pointer"
+              />
             </div>
-            <div>
-              <div className="relative">
-                <span className="absolute left-3 top-2.5 text-cream/30 text-sm font-body">Instagram:</span>
-                <input
-                  type="text"
-                  value={form.instagram}
-                  onChange={(e) => set("instagram", e.target.value)}
-                  placeholder="@amara.osei"
-                  className={INPUT + " pl-[90px]"}
-                />
+            
+            {/* Live Preview Avatar */}
+            <div className="ml-auto flex flex-col items-center">
+              <p className="text-[10px] text-cream/40 mb-1">Preview</p>
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center text-cream font-display font-bold border border-cream/10 text-lg shadow-inner select-none transition-all duration-300"
+                style={{
+                  backgroundImage: `linear-gradient(135deg, ${form.gradientStart}, ${form.gradientEnd})`,
+                }}
+              >
+                {form.name ? form.name.charAt(0).toUpperCase() : "S"}
               </div>
             </div>
           </div>

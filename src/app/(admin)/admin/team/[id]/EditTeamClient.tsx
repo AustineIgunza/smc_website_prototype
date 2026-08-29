@@ -14,9 +14,9 @@ interface Props {
     course: string;
     year: string;
     bio: string;
-    focus: string[];
-    quote: string;
-    socials: any; // Mapped JSON field
+    focus?: string[];
+    quote?: string | null;
+    socials?: any;
     avatarGradient: string[];
     avatarUrl: string | null;
     createdAt: string;
@@ -25,10 +25,6 @@ interface Props {
 }
 
 export default function EditTeamClient({ member }: Props) {
-  const socialsList = Array.isArray(member.socials)
-    ? (member.socials as { platform: string; handle: string }[])
-    : [];
-
   const initial: TeamMemberFormData = {
     name: member.name,
     role: member.role,
@@ -36,11 +32,6 @@ export default function EditTeamClient({ member }: Props) {
     course: member.course,
     year: member.year,
     bio: member.bio,
-    focus: (member.focus ?? []).join(", "),
-    quote: member.quote,
-    linkedin: socialsList.find((s) => s.platform === "LinkedIn")?.handle ?? "",
-    twitter: socialsList.find((s) => s.platform === "Twitter")?.handle ?? "",
-    instagram: socialsList.find((s) => s.platform === "Instagram")?.handle ?? "",
     gradientStart: member.avatarGradient?.[0] ?? "#FFA829",
     gradientEnd: member.avatarGradient?.[1] ?? "#CC8802",
     avatarUrl: member.avatarUrl ?? "",

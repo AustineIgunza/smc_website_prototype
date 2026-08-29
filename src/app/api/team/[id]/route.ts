@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { teamMemberUpdateSchema } from "@/backend/validators/teamMember";
+import { generateUniqueTeamSlug } from "@/lib/team-slug";
 
 export async function GET(
   _request: NextRequest,
@@ -35,12 +36,27 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const updateData: Record<string, unknown> = {
+    ...parsed.data,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (parsed.data.role) {
+    const newId = await generateUniqueTeamSlug(supabase, parsed.data.role, id);
+    if (newId !== id) {
+      updateData.id = newId;
+    }
+  }
+
+  if (parsed.data.bio !== undefined) updateData.bio = parsed.data.bio ?? "";
+  if (parsed.data.quote !== undefined) updateData.quote = parsed.data.quote ?? "";
+  if (parsed.data.focus !== undefined) updateData.focus = parsed.data.focus ?? [];
+  if (parsed.data.socials !== undefined) updateData.socials = parsed.data.socials ?? [];
+  if (parsed.data.avatarUrl !== undefined) updateData.avatarUrl = parsed.data.avatarUrl || null;
+
   const { data: member, error } = await supabase
     .from("TeamMember")
-    .update({
-      ...parsed.data,
-      updatedAt: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("id", id)
     .select()
     .single();

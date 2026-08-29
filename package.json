@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "prisma generate --config prisma/prisma.config.ts && next dev --webpack",
     "build": "prisma generate --config prisma/prisma.config.ts && next build",
     "start": "next start",
     "lint": "eslint",

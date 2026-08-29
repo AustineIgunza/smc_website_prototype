@@ -229,9 +229,9 @@ async function main() {
         course: member.course,
         year: member.year,
         bio: member.bio,
-        focus: member.focus,
-        quote: member.quote,
-        socials: member.socials as any,
+        focus: member.focus ?? [],
+        quote: member.quote ?? null,
+        socials: (member.socials as any) ?? [],
         avatarGradient: member.avatarGradient,
       },
     });
