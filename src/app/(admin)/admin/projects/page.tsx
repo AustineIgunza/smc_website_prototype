@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Plus, ArrowLeft, Sparkles, User, Clock } from "@/components/icons";
 
 export default async function AdminProjectsPage({
   searchParams,
@@ -52,9 +53,21 @@ export default async function AdminProjectsPage({
         </div>
         <Link
           href="/admin/projects/new"
-          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap"
+          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap inline-flex items-center gap-1.5"
         >
-          + New Project
+          <Plus size={16} className="shrink-0" />
+          <span>New Project</span>
+        </Link>
+      </div>
+
+      {/* Back to dashboard */}
+      <div className="mb-6">
+        <Link
+          href="/admin"
+          className="font-body text-cream/45 text-xs hover:text-cream/70 transition-colors inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Back to Dashboard</span>
         </Link>
       </div>
 
@@ -148,8 +161,9 @@ export default async function AdminProjectsPage({
                       {p.status}
                     </span>
                     {p.featured && (
-                      <span className="font-body text-[9px] uppercase font-semibold tracking-wider text-amber bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
-                        ★ Featured
+                      <span className="font-body text-[9px] uppercase font-semibold tracking-wider text-amber bg-amber/5 px-2 py-0.5 rounded border border-amber/10 inline-flex items-center gap-1">
+                        <Sparkles size={9} className="shrink-0" />
+                        <span>Featured</span>
                       </span>
                     )}
                   </div>
@@ -164,9 +178,17 @@ export default async function AdminProjectsPage({
                 </div>
 
                 {/* Footer details */}
-                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
-                  {p.clientName && <p>👤 Client: {p.clientName}</p>}
-                  <p>⏱️ Duration: {p.duration}</p>
+                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1.5">
+                  {p.clientName && (
+                    <p className="flex items-center justify-center gap-1.5">
+                      <User size={11} className="text-amber shrink-0" />
+                      <span className="truncate">Client: {p.clientName}</span>
+                    </p>
+                  )}
+                  <p className="flex items-center justify-center gap-1.5">
+                    <Clock size={11} className="text-amber shrink-0" />
+                    <span>Duration: {p.duration}</span>
+                  </p>
                   {p.tags && p.tags.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-1 mt-2">
                       {p.tags.slice(0, 2).map((t: string) => (

@@ -7,6 +7,7 @@ import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import { useTheme } from "./ThemeProvider";
+import { Sparkles, ExternalLink } from "./icons";
 
 export interface Project {
   id: string;
@@ -69,7 +70,10 @@ function CaseStudyDetail({ project }: { project: Project }) {
           </>
         )}
         {project.featured && (
-          <span className="text-amber text-xs ml-auto">★ Featured</span>
+          <span className="text-amber text-xs ml-auto inline-flex items-center gap-1">
+            <Sparkles size={11} className="shrink-0" />
+            <span>Featured</span>
+          </span>
         )}
       </div>
 
@@ -204,8 +208,8 @@ function CaseStudyDetail({ project }: { project: Project }) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all"
         >
-          View live work
-          <span className="text-xs">↗</span>
+          <span>View live work</span>
+          <ExternalLink size={14} className="shrink-0" />
         </a>
       )}
     </div>
@@ -347,8 +351,9 @@ export default function Portfolio() {
                           {p.category}
                         </span>
                         {p.featured && (
-                          <span className="text-amber text-[10px] uppercase font-semibold tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
-                            ★ Featured
+                          <span className="text-amber text-[10px] uppercase font-semibold tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10 inline-flex items-center gap-1">
+                            <Sparkles size={10} className="shrink-0" />
+                            <span>Featured</span>
                           </span>
                         )}
                       </div>

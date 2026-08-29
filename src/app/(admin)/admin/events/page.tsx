@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Plus, ArrowLeft, Calendar, MapPin, Users } from "@/components/icons";
+import { getCategoryGradient } from "@/data/eventCategories";
 
 export default async function AdminEventsPage() {
   const supabase = await createClient();
@@ -12,21 +14,6 @@ export default async function AdminEventsPage() {
     .select("*, partner:Partner(name), Registration(id, status)")
     .order("startsAt", { ascending: true });
   const events = eventsData || [];
-
-  const getGradientForCategory = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "flagship":
-        return ["#FFA829", "#CC8802"];
-      case "workshop":
-        return ["#6366f1", "#8b5cf6"];
-      case "networking":
-        return ["#059669", "#10b981"];
-      case "competition":
-        return ["#ec4899", "#f43f5e"];
-      default:
-        return ["#013953", "#00313F"];
-    }
-  };
 
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-5xl mx-auto">
@@ -42,9 +29,10 @@ export default async function AdminEventsPage() {
         </div>
         <Link
           href="/admin/events/new"
-          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap"
+          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap inline-flex items-center gap-1.5"
         >
-          + New Event
+          <Plus size={16} className="shrink-0" />
+          <span>New Event</span>
         </Link>
       </div>
 
@@ -52,9 +40,10 @@ export default async function AdminEventsPage() {
       <div className="mb-6">
         <Link
           href="/admin"
-          className="font-body text-cream/45 text-xs hover:text-cream/70 transition-colors flex items-center gap-1"
+          className="font-body text-cream/45 text-xs hover:text-cream/70 transition-colors inline-flex items-center gap-1.5"
         >
-          ← Back to Dashboard
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Back to Dashboard</span>
         </Link>
       </div>
 
@@ -75,7 +64,7 @@ export default async function AdminEventsPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {events.map((event) => {
-            const colors = getGradientForCategory(event.category);
+            const colors = getCategoryGradient(event.category);
             const activeRegs = ((event.Registration as { status: string }[] | null) ?? []).filter(
               (r) => r.status !== "CANCELLED",
             ).length;
@@ -138,21 +127,28 @@ export default async function AdminEventsPage() {
                 </div>
 
                 {/* Footer specs */}
-                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
-                  <p>
-                    📅 {new Date(event.startsAt).toLocaleDateString("en-KE", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1.5">
+                  <p className="flex items-center gap-1.5">
+                    <Calendar size={12} className="text-amber shrink-0" />
+                    <span>
+                      {new Date(event.startsAt).toLocaleDateString("en-KE", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
                   </p>
-                  <p>📍 {event.location}</p>
+                  <p className="flex items-center gap-1.5">
+                    <MapPin size={12} className="text-amber shrink-0" />
+                    <span className="truncate">{event.location}</span>
+                  </p>
                   <div className="flex justify-between items-center pt-2 mt-1 text-[10px]">
                     <span className="font-semibold text-amber/90">
                       {event.type === "PAID" ? `KES ${event.priceKes.toLocaleString()}` : "FREE"}
                     </span>
-                    <span className="text-cream/35">
-                      👥 {activeRegs} / {event.capacity ?? "∞"} registered
+                    <span className="text-cream/35 inline-flex items-center gap-1">
+                      <Users size={11} className="shrink-0" />
+                      <span>{activeRegs} / {event.capacity ?? "∞"} registered</span>
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme } from "../ThemeProvider";
+import { X } from "../icons";
 
 interface DetailModalProps {
   open: boolean;
@@ -95,9 +96,7 @@ export default function DetailModal({ open, onClose, children, title }: DetailMo
               }`}
               aria-label="Close dialog"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M6 6l12 12M6 18L18 6" />
-              </svg>
+              <X size={18} strokeWidth={2.5} />
             </button>
 
             {children}

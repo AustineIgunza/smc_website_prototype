@@ -9,6 +9,43 @@ import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import { useTheme } from "./ThemeProvider";
 import { benefits, type Benefit } from "@/data/membership";
+import {
+  Check,
+  ArrowRight,
+  Target,
+  Brain,
+  Handshake,
+  Trophy,
+  TrendingUp,
+  Palette,
+} from "./icons";
+
+function BenefitIcon({
+  id,
+  size = 28,
+  className = "",
+}: {
+  id: string;
+  size?: number;
+  className?: string;
+}) {
+  switch (id) {
+    case "live-campaigns":
+      return <Target size={size} className={className} />;
+    case "workshops":
+      return <Brain size={size} className={className} />;
+    case "networking":
+      return <Handshake size={size} className={className} />;
+    case "competitions":
+      return <Trophy size={size} className={className} />;
+    case "career-access":
+      return <TrendingUp size={size} className={className} />;
+    case "creative-freedom":
+      return <Palette size={size} className={className} />;
+    default:
+      return <Target size={size} className={className} />;
+  }
+}
 
 /* ── Benefit detail content ──────────────────────────── */
 function BenefitDetail({ benefit }: { benefit: Benefit }) {
@@ -18,8 +55,8 @@ function BenefitDetail({ benefit }: { benefit: Benefit }) {
   return (
     <div className="pr-4">
       <div className="mx-auto sm:mx-0 w-fit mb-5">
-        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center text-4xl select-none shadow-md">
-          {benefit.icon}
+        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center text-amber shadow-md">
+          <BenefitIcon id={benefit.id} size={32} />
         </div>
       </div>
       <h3
@@ -47,18 +84,8 @@ function BenefitDetail({ benefit }: { benefit: Benefit }) {
       <ul className="space-y-2">
         {benefit.highlights.map((h, i) => (
           <li key={i} className="flex gap-3 items-start">
-            <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFA829"
-                strokeWidth="3"
-                strokeLinecap="round"
-              >
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
+            <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0 text-amber">
+              <Check size={12} strokeWidth={3} />
             </span>
             <span
               className={`font-body text-sm leading-relaxed ${
@@ -133,12 +160,12 @@ export default function Membership() {
                     {/* Centered Benefit Icon container */}
                     <div className="mx-auto mb-5 w-fit relative">
                       <motion.div
-                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center text-3xl select-none"
+                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center text-amber select-none group-hover:bg-amber/10 group-hover:border-amber/30 transition-all duration-300"
                         whileHover={
                           prefersReduced ? {} : { scale: 1.1, rotate: 5, transition: { duration: 0.2 } }
                         }
                       >
-                        {b.icon}
+                        <BenefitIcon id={b.id} size={28} className="text-amber group-hover:scale-110 transition-transform duration-300" />
                       </motion.div>
                     </div>
 
@@ -157,8 +184,9 @@ export default function Membership() {
                       {b.desc}
                     </p>
                   </div>
-                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors">
-                    Learn more &rarr;
+                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors inline-flex items-center gap-1.5">
+                    <span>Learn more</span>
+                    <ArrowRight size={13} className="shrink-0" />
                   </div>
                 </div>
               </ClickableCard>

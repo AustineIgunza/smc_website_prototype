@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Plus, ArrowLeft } from "@/components/icons";
 
 export default async function AdminTeamPage() {
   const supabase = await createClient();
@@ -27,9 +28,10 @@ export default async function AdminTeamPage() {
         </div>
         <Link
           href="/admin/team/new"
-          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap"
+          className="px-4 py-2 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap inline-flex items-center gap-1.5"
         >
-          + New Member
+          <Plus size={16} className="shrink-0" />
+          <span>New Member</span>
         </Link>
       </div>
 
@@ -37,9 +39,10 @@ export default async function AdminTeamPage() {
       <div className="mb-6">
         <Link
           href="/admin"
-          className="font-body text-cream/45 text-xs hover:text-cream/70 transition-colors flex items-center gap-1"
+          className="font-body text-cream/45 text-xs hover:text-cream/70 transition-colors inline-flex items-center gap-1.5"
         >
-          ← Back to Dashboard
+          <ArrowLeft size={13} className="shrink-0" />
+          <span>Back to Dashboard</span>
         </Link>
       </div>
 

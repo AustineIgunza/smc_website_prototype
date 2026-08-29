@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Sparkles, Trash2 } from "@/components/icons";
 
 export interface ProjectFormData {
   slug: string;
@@ -309,8 +310,8 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
                     : "bg-cream/5 text-cream/30 border-cream/10 hover:border-cream/20"
                 }`}
               >
-                <span>{form.featured ? "★" : "☆"}</span>
-                {form.featured ? "Featured" : "Not featured"}
+                <Sparkles size={12} className={form.featured ? "text-amber shrink-0" : "text-cream/30 shrink-0"} />
+                <span>{form.featured ? "Featured" : "Not featured"}</span>
               </button>
             </div>
           </div>
@@ -477,9 +478,10 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
           >
-            {deleting ? "Deleting…" : "Delete"}
+            <Trash2 size={14} className="shrink-0" />
+            <span>{deleting ? "Deleting…" : "Delete"}</span>
           </button>
         )}
       </div>

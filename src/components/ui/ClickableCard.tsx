@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../ThemeProvider";
+import { ArrowRight } from "../icons";
 
 interface ClickableCardProps {
   children: React.ReactNode;
@@ -39,11 +40,12 @@ export default function ClickableCard({
 
       {/* "View details →" cue */}
       <span
-        className={`absolute bottom-3 right-4 font-body text-xs font-medium tracking-wide text-amber opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+        className={`absolute bottom-3 right-4 font-body text-xs font-medium tracking-wide text-amber opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center gap-1 ${
           prefersReduced ? "opacity-100" : ""
         }`}
       >
-        {cue} &rarr;
+        <span>{cue}</span>
+        <ArrowRight size={13} className="shrink-0" />
       </span>
     </motion.button>
   );
