@@ -522,81 +522,97 @@ export default function PastEvents() {
                 <StaggerItem key={event.id} y={40}>
                   <ClickableCard
                     onClick={() => setSelectedEvent(event)}
-                    cue="View recap & photos"
-                    className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-[0_16px_32px_rgba(255,168,41,0.08)] dark:hover:shadow-[0_16px_32px_rgba(255,168,41,0.15)]"
+                    cue="View recap"
+                    className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-[0_20px_40px_rgba(255,168,41,0.12)] dark:hover:shadow-[0_20px_40px_rgba(255,168,41,0.18)]"
                   >
-                    <div>
-                      {/* Event Cover Photo with Overlay Badges */}
-                      <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-cream/10 bg-navy/80">
-                        {event.coverImageUrl ? (
-                          <img
-                            src={event.coverImageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                          />
-                        ) : (
-                          <div
-                            className="w-full h-full flex items-center justify-center text-white font-display font-bold text-3xl select-none"
-                            style={{
-                              backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
-                            }}
-                          >
-                            {event.title.charAt(0).toUpperCase()}
+                    <div className="p-5 sm:p-6 pb-9 sm:pb-10 flex flex-col justify-between h-full">
+                      <div>
+                        {/* Event Cover Photo with Overlay Badges */}
+                        <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-4 border border-cream/10 bg-navy/80 shadow-sm">
+                          {event.coverImageUrl ? (
+                            <img
+                              src={event.coverImageUrl}
+                              alt={event.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div
+                              className="w-full h-full flex items-center justify-center text-white font-display font-bold text-4xl select-none"
+                              style={{
+                                backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
+                              }}
+                            >
+                              {event.title.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="absolute top-3 left-3 z-10">
+                            <span className="font-body text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-amber text-teal shadow-md backdrop-blur-md">
+                              {event.category}
+                            </span>
                           </div>
+                          <div className="absolute bottom-3 right-3 z-10">
+                            <span className="flex items-center gap-1.5 bg-black/80 text-white text-[10px] font-body font-semibold px-2.5 py-1 rounded-full backdrop-blur-md border border-white/15 shadow-sm">
+                              <Images size={12} className="text-amber" />
+                              <span>{photoCount} Photos</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Title & Excerpt */}
+                        <h3
+                          className={`font-display text-lg sm:text-xl font-bold mb-2 line-clamp-1 group-hover:text-amber transition-colors ${
+                            dark ? "text-cream" : "text-navy"
+                          }`}
+                        >
+                          {event.title}
+                        </h3>
+
+                        <p
+                          className={`font-body text-xs sm:text-sm line-clamp-2 leading-relaxed mb-4 ${
+                            dark ? "text-cream/65" : "text-navy/70"
+                          }`}
+                        >
+                          {event.description}
+                        </p>
+
+                        {/* Optional Partner Row */}
+                        {event.partnerName && (
+                          <p className="font-body text-[11px] text-amber/90 font-medium mb-3 truncate flex items-center gap-1">
+                            <Sparkles size={11} className="text-amber shrink-0" />
+                            <span>With {event.partnerName}</span>
+                          </p>
                         )}
-                        <div className="absolute top-3 left-3">
-                          <span className="font-body text-[9px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-amber text-teal shadow-md">
-                            {event.category}
-                          </span>
-                        </div>
-                        <div className="absolute bottom-3 right-3">
-                          <span className="flex items-center gap-1.5 bg-black/75 text-white text-[10px] font-body font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
-                            <Images size={12} className="text-amber" />
-                            <span>{photoCount} Photos</span>
-                          </span>
-                        </div>
                       </div>
 
-                      {/* Title & Excerpt */}
-                      <h3
-                        className={`font-display text-base sm:text-lg font-bold mb-2 line-clamp-1 ${
-                          dark ? "text-cream" : "text-navy"
+                      {/* Metadata Footer */}
+                      <div
+                        className={`pt-3.5 border-t font-body text-xs flex items-center justify-between mt-auto transition-opacity duration-200 group-hover:opacity-40 ${
+                          dark ? "border-cream/10 text-cream/60" : "border-navy/10 text-navy/60"
                         }`}
                       >
-                        {event.title}
-                      </h3>
-
-                      <p
-                        className={`font-body text-xs line-clamp-2 leading-relaxed mb-4 ${
-                          dark ? "text-cream/55" : "text-navy/65"
-                        }`}
-                      >
-                        {event.description}
-                      </p>
-                    </div>
-
-                    {/* Metadata Footer */}
-                    <div
-                      className={`pt-3 border-t font-body text-[11px] flex items-center justify-between ${
-                        dark ? "border-cream/10 text-cream/50" : "border-navy/10 text-navy/55"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1">
-                        <Calendar size={12} className="text-amber" />
-                        <span>
-                          {new Date(event.date).toLocaleDateString("en-KE", {
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                      </div>
-
-                      {event.attendanceCount && (
-                        <div className="flex items-center gap-1 text-amber font-semibold">
-                          <Users size={12} />
-                          <span>{event.attendanceCount}+</span>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={13} className="text-amber shrink-0" />
+                          <span>
+                            {new Date(event.date).toLocaleDateString("en-KE", {
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
                         </div>
-                      )}
+
+                        <div className="flex items-center gap-3">
+                          {event.attendanceCount && (
+                            <div className="flex items-center gap-1 text-amber font-semibold">
+                              <Users size={13} className="shrink-0" />
+                              <span>{event.attendanceCount}+</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1 truncate max-w-[110px] sm:max-w-[130px]">
+                            <MapPin size={12} className="text-amber/70 shrink-0" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </ClickableCard>
                 </StaggerItem>
