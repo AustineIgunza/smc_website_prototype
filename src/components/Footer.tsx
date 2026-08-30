@@ -44,11 +44,11 @@ export default function Footer() {
       <AnimatedBg variant="dots" surface={dark ? "teal" : "navy"} intensity={0.5} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-14">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12 mb-10 sm:mb-14">
           {/* Brand */}
-          <div>
+          <div className="lg:max-w-sm">
             <Logo variant="full" size={60} onDarkBg />
-            <p className="font-body text-cream/50 text-sm mt-4 leading-relaxed max-w-xs">
+            <p className="font-body text-cream/50 text-sm mt-4 leading-relaxed">
               The premier launchpad for the next generation of marketing talent
               at Strathmore University.
             </p>
@@ -93,32 +93,6 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-display text-cream text-sm font-bold uppercase tracking-widest mb-4">
-              Newsletter
-            </h4>
-            <p className="font-body text-cream/50 text-sm mb-4 leading-relaxed">
-              Stay updated with the latest from SMC.
-            </p>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex gap-2"
-            >
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 min-w-0 px-4 py-2.5 rounded-full bg-cream/10 border border-cream/10 text-cream text-sm font-body placeholder:text-cream/30 focus:outline-none focus:border-amber/50 transition-colors"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2.5 rounded-full bg-amber text-teal font-body text-sm font-semibold hover:bg-gold transition-colors shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
           </div>
         </div>
 
