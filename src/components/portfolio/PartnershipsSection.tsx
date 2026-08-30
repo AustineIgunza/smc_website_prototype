@@ -73,7 +73,7 @@ export default function PartnershipsSection({
   const prefersReduced = useReducedMotion();
 
   return (
-    <div className="mt-28 sm:mt-36 pt-16 border-t border-cream/10">
+    <div id="partnerships" className="mt-28 sm:mt-36 pt-16 border-t border-cream/10 scroll-mt-24">
       {/* ── Section Header ─────────────────────────────────── */}
       <Reveal y={30}>
         <div className="text-center max-w-3xl mx-auto mb-16">

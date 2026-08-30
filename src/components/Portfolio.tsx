@@ -9,7 +9,7 @@ import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
 import CaseStudyDetail, { type Project } from "./portfolio/CaseStudyDetail";
 import { useTheme } from "./ThemeProvider";
-import { Sparkles, ArrowRight } from "./icons";
+import { Sparkles, ArrowRight, Briefcase, Handshake } from "./icons";
 import {
   PROJECT_CATEGORIES,
   getProjectCategoryLabel,
@@ -123,17 +123,52 @@ export default function Portfolio({
             Our <span className="text-amber">Work</span>
           </p>
           <p
-            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-12 sm:mb-20 ${
+            className={`font-body text-base sm:text-lg text-center max-w-2xl mx-auto mb-8 sm:mb-10 ${
               dark ? "text-cream/60" : "text-navy/75"
             }`}
           >
             Real projects. Real brands. Real results. Click any project to see
             the full case study.
           </p>
+
+          {/* Quick guide navigation pills */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16">
+            <a
+              href="#our-work"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("our-work")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-xs sm:text-sm font-bold tracking-wide transition-all border shadow-sm cursor-pointer ${
+                dark
+                  ? "bg-amber/15 text-amber border-amber/30 hover:bg-amber hover:text-teal"
+                  : "bg-amber text-teal border-amber hover:bg-gold"
+              }`}
+            >
+              <Briefcase size={15} />
+              <span>Our Work & Case Studies</span>
+            </a>
+
+            <a
+              href="#partnerships"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("partnerships")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-xs sm:text-sm font-bold tracking-wide transition-all border cursor-pointer ${
+                dark
+                  ? "bg-cream/5 text-cream/80 border-cream/15 hover:bg-cream/10 hover:border-amber/40 hover:text-amber"
+                  : "bg-white text-navy/80 border-navy/15 hover:bg-navy/5 hover:border-amber hover:text-navy"
+              }`}
+            >
+              <Handshake size={15} />
+              <span>Strategic Partnerships</span>
+            </a>
+          </div>
         </Reveal>
 
         <Reveal y={40} delay={0.15}>
-          <div className="flex items-center gap-4 mt-12 mb-6">
+          <div id="our-work" className="flex items-center gap-4 mt-8 mb-6 scroll-mt-24">
             <h3 className={`font-display text-base sm:text-lg font-bold uppercase tracking-wider ${dark ? "text-amber" : "text-gold"}`}>
               Project Categories
             </h3>
