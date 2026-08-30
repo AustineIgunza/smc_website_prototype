@@ -6,6 +6,16 @@ const commaSeparated = z
 
 const optionalUrl = z.string().trim().url().or(z.literal("")).optional();
 
+// Narrative sections are optional: not every project has source material for a
+// full problem/approach/outcome write-up. When present, require real copy.
+const narrative = z
+  .string()
+  .trim()
+  .min(10)
+  .or(z.literal(""))
+  .optional()
+  .default("");
+
 export const projectSchema = z.object({
   slug: z
     .string()
@@ -15,9 +25,9 @@ export const projectSchema = z.object({
   title: z.string().trim().min(2),
   category: z.string().trim().min(1),
   desc: z.string().trim().min(10),
-  problem: z.string().trim().min(10),
-  approach: z.string().trim().min(10),
-  outcome: z.string().trim().min(10),
+  problem: narrative,
+  approach: narrative,
+  outcome: narrative,
   metrics: commaSeparated,
   team: commaSeparated,
   duration: z.string().trim().min(1),
