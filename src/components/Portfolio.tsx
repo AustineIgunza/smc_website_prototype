@@ -1,217 +1,40 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Reveal from "./ui/Reveal";
 import AnimatedBg from "./ui/AnimatedBg";
 import ClickableCard from "./ui/ClickableCard";
 import DetailModal from "./ui/DetailModal";
+import CaseStudyDetail, { type Project } from "./portfolio/CaseStudyDetail";
 import { useTheme } from "./ThemeProvider";
-import { Sparkles, ExternalLink } from "./icons";
+import { Sparkles, ArrowRight } from "./icons";
+import {
+  PROJECT_CATEGORIES,
+  getProjectCategoryLabel,
+} from "@/data/projectCategories";
 
-export interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  clientName: string | null;
-  desc: string;
-  problem: string;
-  approach: string;
-  outcome: string;
-  metrics: string[];
-  team: string[];
-  tags: string[];
-  duration: string;
-  status: string;
-  featured: boolean;
-  coverImageUrl: string | null;
-  liveUrl: string | null;
-  testimonial: string | null;
-  testimonialAuthor: string | null;
-}
+export type { Project };
 
-/* ── Case study modal content ─────────────────────────── */
-function CaseStudyDetail({ project }: { project: Project }) {
-  const { theme } = useTheme();
-  const dark = theme === "dark";
-
-  const sections = [
-    { label: "Problem", text: project.problem },
-    { label: "Approach", text: project.approach },
-    { label: "Outcome", text: project.outcome },
-  ];
-
+/* ── Loading skeleton card ────────────────────────────── */
+function SkeletonCard({ dark }: { dark: boolean }) {
+  const block = dark ? "bg-cream/10" : "bg-navy/10";
   return (
-    <div className="pr-4">
-      {/* Cover image */}
-      {project.coverImageUrl && (
-        <div
-          className="w-full h-40 sm:h-52 rounded-xl bg-cover bg-center mb-6 -mt-1"
-          style={{ backgroundImage: `url(${project.coverImageUrl})` }}
-        />
-      )}
-
-      {/* Category + client */}
-      <div className="flex items-center gap-2 flex-wrap mb-3">
-        <span
-          className={`font-body text-xs font-semibold tracking-widest uppercase ${
-            dark ? "text-gold" : "text-amber"
-          }`}
-        >
-          {project.category}
-        </span>
-        {project.clientName && (
-          <>
-            <span className={dark ? "text-cream/20" : "text-navy/20"}>·</span>
-            <span className={`font-body text-xs ${dark ? "text-cream/50" : "text-navy/60"}`}>
-              {project.clientName}
-            </span>
-          </>
-        )}
-        {project.featured && (
-          <span className="text-amber text-xs ml-auto inline-flex items-center gap-1">
-            <Sparkles size={11} className="shrink-0" />
-            <span>Featured</span>
-          </span>
-        )}
+    <div
+      className={`rounded-2xl border p-6 sm:p-8 ${
+        dark ? "border-cream/10" : "border-navy/10"
+      }`}
+    >
+      <div className="animate-pulse flex flex-col items-center">
+        <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl mb-5 ${block}`} />
+        <div className={`h-2 w-24 rounded-full mb-3 ${block}`} />
+        <div className={`h-3 w-40 rounded-full mb-3 ${block}`} />
+        <div className={`h-2 w-full rounded-full mb-2 ${block}`} />
+        <div className={`h-2 w-4/5 rounded-full mb-6 ${block}`} />
+        <div className={`h-[1px] w-full mb-4 ${block}`} />
+        <div className={`h-2 w-32 rounded-full ${block}`} />
       </div>
-
-      <h3
-        className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
-          dark ? "text-cream" : "text-navy"
-        }`}
-      >
-        {project.title}
-      </h3>
-      <p
-        className={`font-body text-sm mb-6 ${
-          dark ? "text-cream/50" : "text-navy/60"
-        }`}
-      >
-        {project.duration} &middot; Team of {(project.team ?? []).length}
-      </p>
-
-      {/* Problem / Approach / Outcome */}
-      <div className="space-y-5 mb-6">
-        {sections.map((s) => (
-          <div key={s.label}>
-            <p
-              className={`font-body text-xs font-semibold tracking-widest uppercase mb-2 ${
-                dark ? "text-cream/40" : "text-navy/50"
-              }`}
-            >
-              {s.label}
-            </p>
-            <p
-              className={`font-body text-sm sm:text-base leading-relaxed ${
-                dark ? "text-cream/70" : "text-navy/80"
-              }`}
-            >
-              {s.text}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Metrics */}
-      <div className="mb-6">
-        <p
-          className={`font-body text-xs font-semibold tracking-widest uppercase mb-3 ${
-            dark ? "text-cream/40" : "text-navy/50"
-          }`}
-        >
-          Key Metrics
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {(project.metrics ?? []).map((m) => (
-            <span
-              key={m}
-              className="font-body text-xs font-semibold px-3 py-1.5 rounded-full bg-amber/10 text-amber"
-            >
-              {m}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Tags */}
-      {(project.tags ?? []).length > 0 && (
-        <div className="mb-6">
-          <p
-            className={`font-body text-xs font-semibold tracking-widest uppercase mb-3 ${
-              dark ? "text-cream/40" : "text-navy/50"
-            }`}
-          >
-            Tags
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {(project.tags ?? []).map((t) => (
-              <span
-                key={t}
-                className={`font-body text-xs font-semibold px-3 py-1.5 rounded-full ${
-                  dark ? "bg-cream/10 text-cream/60" : "bg-navy/5 text-navy/60"
-                }`}
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Team */}
-      <div className={project.testimonial ? "mb-6" : ""}>
-        <p
-          className={`font-body text-xs font-semibold tracking-widest uppercase mb-3 ${
-            dark ? "text-cream/40" : "text-navy/50"
-          }`}
-        >
-          Team
-        </p>
-        <p
-          className={`font-body text-sm ${
-            dark ? "text-cream/60" : "text-navy/70"
-          }`}
-        >
-          {(project.team ?? []).join(", ")}
-        </p>
-      </div>
-
-      {/* Testimonial */}
-      {project.testimonial && (
-        <div
-          className={`rounded-xl p-4 sm:p-5 border-l-2 border-amber mb-6 ${
-            dark ? "bg-cream/5" : "bg-navy/5"
-          }`}
-        >
-          <p
-            className={`font-body text-sm sm:text-base leading-relaxed italic mb-3 ${
-              dark ? "text-cream/70" : "text-navy/75"
-            }`}
-          >
-            &ldquo;{project.testimonial}&rdquo;
-          </p>
-          {project.testimonialAuthor && (
-            <p className={`font-body text-xs font-semibold ${dark ? "text-cream/40" : "text-navy/50"}`}>
-              {project.testimonialAuthor}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Live work CTA */}
-      {project.liveUrl && (
-        <a
-          href={project.liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all"
-        >
-          <span>View live work</span>
-          <ExternalLink size={14} className="shrink-0" />
-        </a>
-      )}
     </div>
   );
 }
@@ -223,19 +46,45 @@ export default function Portfolio() {
   const prefersReduced = useReducedMotion();
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [selected, setSelected] = useState<Project | null>(null);
 
   useEffect(() => {
-    fetch("/api/projects")
-      .then((r) => r.json())
-      .then((data: Project[]) => setProjects(data))
-      .catch(() => {});
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/projects");
+        if (!res.ok) throw new Error(`Request failed (${res.status})`);
+        const data: Project[] = await res.json();
+        if (!cancelled) setProjects(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) {
+          setError("We couldn't load our work right now. Please try again.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  // Filter chips come from the shared taxonomy, in config order — only
+  // showing categories that actually have published projects behind them.
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(projects.map((p) => p.category)));
-    return ["All", ...cats];
+    const present = new Set(projects.map((p) => p.category));
+    return [
+      "All",
+      ...PROJECT_CATEGORIES.filter((c) => present.has(c.id)).map((c) => c.id),
+    ];
   }, [projects]);
 
   const filtered = useMemo(
@@ -287,118 +136,156 @@ export default function Portfolio() {
         </Reveal>
 
         {/* Category filter tabs */}
-        <Reveal delay={0.1}>
-          <div className="flex flex-wrap gap-2 mb-6 sm:mb-8">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`px-4 py-2 rounded-full font-body text-xs font-semibold tracking-wide transition-colors cursor-pointer ${
-                  activeFilter === cat
-                    ? "bg-amber text-teal"
-                    : dark
-                      ? "bg-cream/5 text-cream/60 hover:bg-cream/10"
-                      : "bg-navy/5 text-navy/70 hover:bg-navy/10"
-                }`}
-              >
-                {cat}
-              </button>
+        {!loading && !error && categories.length > 1 && (
+          <Reveal delay={0.1}>
+            <div className="flex flex-wrap gap-2 mb-6 sm:mb-8">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`px-4 py-2 rounded-full font-body text-xs font-semibold tracking-wide transition-colors cursor-pointer ${
+                    activeFilter === cat
+                      ? "bg-amber text-teal"
+                      : dark
+                        ? "bg-cream/5 text-cream/60 hover:bg-cream/10"
+                        : "bg-navy/5 text-navy/70 hover:bg-navy/10"
+                  }`}
+                >
+                  {cat === "All" ? "All" : getProjectCategoryLabel(cat)}
+                </button>
+              ))}
+            </div>
+          </Reveal>
+        )}
+
+        {/* Loading skeletons */}
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} dark={dark} />
             ))}
           </div>
-        </Reveal>
+        )}
+
+        {/* Error state */}
+        {!loading && error && (
+          <div
+            className={`rounded-2xl border px-6 py-12 text-center ${
+              dark
+                ? "border-cream/10 bg-cream/5"
+                : "border-navy/10 bg-navy/5"
+            }`}
+          >
+            <p
+              className={`font-body text-sm sm:text-base mb-4 ${
+                dark ? "text-cream/70" : "text-navy/75"
+              }`}
+            >
+              {error}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2.5 rounded-lg bg-amber text-teal font-body font-bold text-sm hover:brightness-110 transition-all cursor-pointer"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         {/* Project cards grid */}
-        <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((p) => (
-              <motion.div
-                key={p.id}
-                layout
-                initial={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <ClickableCard onClick={() => setSelected(p)} cue="View case study">
-                  <div className="p-6 sm:p-8 text-center flex flex-col justify-between h-full">
-                    <div>
-                      {/* Cover image or fallback */}
-                      <div className="mx-auto mb-5 w-fit relative">
-                        {p.coverImageUrl ? (
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-md transition-transform duration-300 group-hover:scale-105">
-                            <img
-                              src={p.coverImageUrl}
-                              alt={p.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-cream/5 border border-white/20 dark:border-white/10 flex items-center justify-center select-none transition-transform duration-300 group-hover:scale-105">
-                            <span className="font-display text-2xl text-cream/20 font-bold">
-                              {p.title.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+        {!loading && !error && (
+          <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((p) => (
+                <motion.div
+                  key={p.id}
+                  layout
+                  initial={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <ClickableCard onClick={() => setSelected(p)} cue="View case study">
+                    <div className="p-6 sm:p-8 text-center flex flex-col justify-between h-full">
+                      <div>
+                        {/* Cover image or fallback */}
+                        <div className="mx-auto mb-5 w-fit relative">
+                          {p.coverImageUrl ? (
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-md transition-transform duration-300 group-hover:scale-105">
+                              <img
+                                src={p.coverImageUrl}
+                                alt={p.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-cream/5 border border-white/20 dark:border-white/10 flex items-center justify-center select-none transition-transform duration-300 group-hover:scale-105">
+                              <span className="font-display text-2xl text-cream/20 font-bold">
+                                {p.title.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Category + featured */}
-                      <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
-                        <span
-                          className={`font-body text-[10px] font-semibold tracking-widest uppercase ${
-                            dark ? "text-gold" : "text-amber"
+                        {/* Category + featured */}
+                        <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+                          <span
+                            className={`font-body text-[10px] font-semibold tracking-widest uppercase ${
+                              dark ? "text-gold" : "text-amber"
+                            }`}
+                          >
+                            {getProjectCategoryLabel(p.category)}
+                          </span>
+                          {p.featured && (
+                            <span className="text-amber text-[10px] uppercase font-semibold tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10 inline-flex items-center gap-1">
+                              <Sparkles size={10} className="shrink-0" />
+                              <span>Featured</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <h3
+                          className={`font-display text-sm sm:text-base font-bold mb-2 line-clamp-1 group-hover:text-amber transition-colors ${
+                            dark ? "text-cream" : "text-navy"
                           }`}
                         >
-                          {p.category}
-                        </span>
-                        {p.featured && (
-                          <span className="text-amber text-[10px] uppercase font-semibold tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10 inline-flex items-center gap-1">
-                            <Sparkles size={10} className="shrink-0" />
-                            <span>Featured</span>
-                          </span>
-                        )}
+                          {p.title}
+                        </h3>
+
+                        <p
+                          className={`font-body text-xs leading-relaxed mb-4 line-clamp-2 ${
+                            dark ? "text-cream/60" : "text-navy/75"
+                          }`}
+                        >
+                          {p.desc}
+                        </p>
                       </div>
 
-                      <h3
-                        className={`font-display text-sm sm:text-base font-bold mb-2 line-clamp-1 group-hover:text-amber transition-colors ${
-                          dark ? "text-cream" : "text-navy"
-                        }`}
-                      >
-                        {p.title}
-                      </h3>
-
-                      <p
-                        className={`font-body text-xs leading-relaxed mb-4 line-clamp-2 ${
-                          dark ? "text-cream/60" : "text-navy/75"
-                        }`}
-                      >
-                        {p.desc}
-                      </p>
-                    </div>
-
-                    {/* Footer / Info */}
-                    <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
-                      {p.clientName && <p>Client: {p.clientName}</p>}
-                      <p>Duration: {p.duration}</p>
-                      <div className="flex flex-wrap justify-center gap-1.5 pt-2 mt-1">
-                        {(p.metrics ?? []).slice(0, 2).map((m) => (
-                          <span
-                            key={m}
-                            className="font-body text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/15"
-                          >
-                            {m}
-                          </span>
-                        ))}
+                      {/* Footer / Info */}
+                      <div className="pt-4 border-t border-cream/5 font-body text-[11px] text-cream/50 space-y-1">
+                        {p.clientName && <p>Client: {p.clientName}</p>}
+                        {p.duration && <p>Duration: {p.duration}</p>}
+                        <div className="flex flex-wrap justify-center gap-1.5 pt-2 mt-1">
+                          {(p.metrics ?? []).slice(0, 2).map((m) => (
+                            <span
+                              key={m}
+                              className="font-body text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/15"
+                            >
+                              {m}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ClickableCard>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+                  </ClickableCard>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         <AnimatePresence>
-          {filtered.length === 0 && (
+          {!loading && !error && filtered.length === 0 && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -407,7 +294,9 @@ export default function Portfolio() {
                 dark ? "text-cream/40" : "text-navy/50"
               }`}
             >
-              No projects in this category yet.
+              {projects.length === 0
+                ? "Our case studies are on their way — check back soon."
+                : "No projects in this category yet."}
             </motion.p>
           )}
         </AnimatePresence>
@@ -418,7 +307,24 @@ export default function Portfolio() {
         onClose={() => setSelected(null)}
         title={selected?.title}
       >
-        {selected && <CaseStudyDetail project={selected} />}
+        {selected && (
+          <>
+            <CaseStudyDetail project={selected} />
+            <div className="pr-4 mt-6">
+              <Link
+                href={`/portfolio/${selected.slug}`}
+                className={`inline-flex items-center gap-1.5 font-body text-sm font-semibold transition-colors ${
+                  dark
+                    ? "text-amber hover:text-amber/80"
+                    : "text-gold hover:text-amber"
+                }`}
+              >
+                <span>View full case study page</span>
+                <ArrowRight size={14} className="shrink-0" />
+              </Link>
+            </div>
+          </>
+        )}
       </DetailModal>
     </section>
   );
