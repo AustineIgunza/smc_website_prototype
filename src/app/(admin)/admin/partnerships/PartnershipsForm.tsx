@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useRef, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import type {
   PartnershipsContent,
   InternalPartner,
   ExternalPartner,
 } from "@/data/partnerships";
+import { Upload, X, CheckCircle2, Sparkles } from "@/components/icons";
 
 const INPUT =
   "w-full px-4 py-2.5 rounded-lg bg-cream/5 border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber placeholder:text-cream/25 transition-colors disabled:opacity-50";
@@ -47,6 +48,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export default function PartnershipsForm({
   initial,
 }: {
@@ -61,6 +70,11 @@ export default function PartnershipsForm({
     "external"
   );
 
+  // Logo upload state per external partner index
+  const [uploadingLogo, setUploadingLogo] = useState<Record<number, boolean>>({});
+  const [logoErrors, setLogoErrors] = useState<Record<number, string | null>>({});
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
   function updateField<K extends keyof PartnershipsContent>(
     key: K,
     value: PartnershipsContent[K]
@@ -72,7 +86,17 @@ export default function PartnershipsForm({
   // External Partners handlers
   function updateExternalPartner(index: number, updated: Partial<ExternalPartner>) {
     const next = [...form.externalPartners];
-    next[index] = { ...next[index], ...updated };
+    const current = next[index];
+    const newName = updated.name !== undefined ? updated.name : current.name;
+    
+    // Auto-update id if current id looks auto-generated or default
+    let newId = updated.id !== undefined ? updated.id : current.id;
+    if (updated.name && (!current.id || current.id.startsWith("partner-"))) {
+      const slug = slugify(updated.name);
+      if (slug) newId = slug;
+    }
+
+    next[index] = { ...current, ...updated, id: newId, name: newName };
     updateField("externalPartners", next);
   }
 
@@ -82,6 +106,7 @@ export default function PartnershipsForm({
       name: "New Corporate Partner",
       industry: "Industry / Sector",
       description: "Describe the collaboration and value delivered to members.",
+      logoUrl: null,
     };
     updateField("externalPartners", [...form.externalPartners, newPartner]);
   }
@@ -101,10 +126,64 @@ export default function PartnershipsForm({
     updateField("externalPartners", next);
   }
 
+  // Handle partner logo upload
+  async function handleLogoFileChange(
+    index: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo((prev) => ({ ...prev, [index]: true }));
+    setLogoErrors((prev) => ({ ...prev, [index]: null }));
+
+    try {
+      const partner = form.externalPartners[index];
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("partnerId", partner.id || slugify(partner.name) || "partner");
+
+      const res = await fetch("/api/partnerships-content/logo", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload logo");
+      }
+
+      updateExternalPartner(index, { logoUrl: data.url });
+    } catch (err: any) {
+      setLogoErrors((prev) => ({
+        ...prev,
+        [index]: err.message || "Failed to upload logo",
+      }));
+    } finally {
+      setUploadingLogo((prev) => ({ ...prev, [index]: false }));
+      if (fileInputRefs.current[index]) {
+        fileInputRefs.current[index]!.value = "";
+      }
+    }
+  }
+
+  function handleRemoveLogo(index: number) {
+    updateExternalPartner(index, { logoUrl: null });
+  }
+
   // Internal Partners handlers
   function updateInternalPartner(index: number, updated: Partial<InternalPartner>) {
     const next = [...form.internalPartners];
-    next[index] = { ...next[index], ...updated };
+    const current = next[index];
+    const newName = updated.name !== undefined ? updated.name : current.name;
+
+    let newId = updated.id !== undefined ? updated.id : current.id;
+    if (updated.name && (!current.id || current.id.startsWith("internal-"))) {
+      const slug = slugify(updated.name);
+      if (slug) newId = slug;
+    }
+
+    next[index] = { ...current, ...updated, id: newId, name: newName };
     updateField("internalPartners", next);
   }
 
@@ -225,7 +304,7 @@ export default function PartnershipsForm({
             {form.externalPartners.map((p, idx) => (
               <div
                 key={p.id || idx}
-                className="relative rounded-2xl bg-navy/60 border border-cream/10 p-6 space-y-4 hover:border-cream/20 transition-all"
+                className="relative rounded-2xl bg-navy/60 border border-cream/10 p-6 space-y-5 hover:border-cream/20 transition-all"
               >
                 {/* Control buttons */}
                 <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -261,17 +340,7 @@ export default function PartnershipsForm({
                   Corporate Partner #{idx + 1}
                 </h3>
 
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Field label="System ID (slug)">
-                    <input
-                      className={INPUT}
-                      value={p.id}
-                      onChange={(e) =>
-                        updateExternalPartner(idx, { id: e.target.value })
-                      }
-                      required
-                    />
-                  </Field>
+                <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="Partner Name">
                     <input
                       className={INPUT}
@@ -279,6 +348,7 @@ export default function PartnershipsForm({
                       onChange={(e) =>
                         updateExternalPartner(idx, { name: e.target.value })
                       }
+                      placeholder="e.g. Kenya Commercial Bank"
                       required
                     />
                   </Field>
@@ -294,6 +364,81 @@ export default function PartnershipsForm({
                   </Field>
                 </div>
 
+                {/* Optional Partner Logo */}
+                <div>
+                  <label className={LABEL}>Partner Logo (Optional)</label>
+                  <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-cream/5 border border-cream/10">
+                    {p.logoUrl ? (
+                      <div className="relative w-16 h-16 rounded-xl bg-white/10 border border-white/20 p-2 flex items-center justify-center overflow-hidden shrink-0">
+                        <img
+                          src={p.logoUrl}
+                          alt={p.name}
+                          className="w-full h-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLogo(idx)}
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] hover:bg-red-500 transition-colors cursor-pointer"
+                          title="Remove Logo"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl bg-amber/10 border border-amber/20 flex items-center justify-center font-display font-bold text-amber text-sm shrink-0">
+                        {p.name ? p.name.substring(0, 2).toUpperCase() : "LOGO"}
+                      </div>
+                    )}
+
+                    <div className="flex-1 min-w-[200px] space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={(el) => {
+                            fileInputRefs.current[idx] = el;
+                          }}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          className="hidden"
+                          onChange={(e) => handleLogoFileChange(idx, e)}
+                        />
+                        <button
+                          type="button"
+                          disabled={uploadingLogo[idx]}
+                          onClick={() => fileInputRefs.current[idx]?.click()}
+                          className="px-3.5 py-1.5 rounded-lg bg-cream/10 border border-cream/20 text-cream font-body text-xs font-semibold hover:bg-cream/20 disabled:opacity-50 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                          <Upload size={13} />
+                          <span>
+                            {uploadingLogo[idx]
+                              ? "Uploading..."
+                              : p.logoUrl
+                              ? "Replace Logo"
+                              : "Upload Logo"}
+                          </span>
+                        </button>
+
+                        {p.logoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLogo(idx)}
+                            className="px-3 py-1.5 rounded-lg bg-transparent text-cream/40 hover:text-red-400 font-body text-xs transition-colors cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <p className="font-body text-[11px] text-cream/40">
+                        Recommended: PNG or SVG with transparent background (Max 4MB)
+                      </p>
+                      {logoErrors[idx] && (
+                        <p className="font-body text-xs text-red-400">
+                          {logoErrors[idx]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <Field label="Collaboration Impact Description">
                     <textarea
@@ -304,6 +449,7 @@ export default function PartnershipsForm({
                           description: e.target.value,
                         })
                       }
+                      placeholder="Explain how this partnership provides real-world marketing value or exposure to members."
                       required
                     />
                   </Field>
@@ -369,17 +515,7 @@ export default function PartnershipsForm({
                   Internal Partner #{idx + 1}
                 </h3>
 
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Field label="System ID (slug)">
-                    <input
-                      className={INPUT}
-                      value={p.id}
-                      onChange={(e) =>
-                        updateInternalPartner(idx, { id: e.target.value })
-                      }
-                      required
-                    />
-                  </Field>
+                <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="Partner Name">
                     <input
                       className={INPUT}
@@ -387,6 +523,7 @@ export default function PartnershipsForm({
                       onChange={(e) =>
                         updateInternalPartner(idx, { name: e.target.value })
                       }
+                      placeholder="e.g. Strathmore University Foundation"
                       required
                     />
                   </Field>
@@ -397,7 +534,7 @@ export default function PartnershipsForm({
                       onChange={(e) =>
                         updateInternalPartner(idx, { category: e.target.value })
                       }
-                      placeholder="e.g. Student Leadership"
+                      placeholder="e.g. Student Leadership & Governance"
                     />
                   </Field>
                 </div>
