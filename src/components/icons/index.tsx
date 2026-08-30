@@ -55,6 +55,7 @@ import {
   Trophy,
   TrendingUp,
   Palette,
+  Briefcase,
 } from "lucide-react";
 
 export {
@@ -75,6 +76,7 @@ export {
   Trophy,
   TrendingUp,
   Palette,
+  Briefcase,
   Check,
   CheckCircle,
   CheckCircle2,

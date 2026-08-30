@@ -9,8 +9,8 @@ const benefitSchema = z.object({
   icon: z.string().trim().min(1, "Icon is required"),
   title: text(),
   desc: text(),
-  longDesc: longText,
-  highlights: z.array(z.string().trim().min(1, "Highlight cannot be empty")),
+  longDesc: z.string().optional(),
+  highlights: z.array(z.string()).optional(),
 });
 
 const joinStepSchema = z.object({

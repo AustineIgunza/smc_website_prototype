@@ -1,27 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Reveal from "./ui/Reveal";
 import { StaggerContainer, StaggerItem } from "./ui/Reveal";
 import AnimatedBg from "./ui/AnimatedBg";
-import ClickableCard from "./ui/ClickableCard";
-import DetailModal from "./ui/DetailModal";
 import { useTheme } from "./ThemeProvider";
 import {
   DEFAULT_MEMBERSHIP_CONTENT,
   type MembershipContent,
-  type Benefit,
 } from "@/data/membership-defaults";
 import {
-  Check,
-  ArrowRight,
   Target,
   Brain,
   Handshake,
   Trophy,
   TrendingUp,
   Palette,
+  Briefcase,
+  Globe,
+  Heart,
+  Award,
+  Sparkles,
+  Users,
 } from "./icons";
 
 function BenefitIcon({
@@ -35,8 +35,9 @@ function BenefitIcon({
   size?: number;
   className?: string;
 }) {
-  const key = icon || id;
+  const key = (icon || id || "").toLowerCase();
   switch (key) {
+    case "industry-exposure":
     case "live-campaigns":
     case "target":
       return <Target size={size} className={className} />;
@@ -46,72 +47,31 @@ function BenefitIcon({
     case "networking":
     case "handshake":
       return <Handshake size={size} className={className} />;
+    case "leadership-execution":
     case "competitions":
     case "trophy":
       return <Trophy size={size} className={className} />;
     case "career-access":
     case "chart":
       return <TrendingUp size={size} className={className} />;
+    case "portfolio-building":
     case "creative-freedom":
     case "palette":
       return <Palette size={size} className={className} />;
+    case "community-growth":
+    case "heart":
+      return <Heart size={size} className={className} />;
+    case "briefcase":
+      return <Briefcase size={size} className={className} />;
+    case "users":
+      return <Users size={size} className={className} />;
+    case "award":
+      return <Award size={size} className={className} />;
+    case "sparkles":
+      return <Sparkles size={size} className={className} />;
     default:
       return <Target size={size} className={className} />;
   }
-}
-
-/* ── Benefit detail content ──────────────────────────── */
-function BenefitDetail({ benefit }: { benefit: Benefit }) {
-  const { theme } = useTheme();
-  const dark = theme === "dark";
-
-  return (
-    <div className="pr-4">
-      <div className="mx-auto sm:mx-0 w-fit mb-5">
-        <div className="w-16 h-16 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center text-amber shadow-md">
-          <BenefitIcon icon={benefit.icon} id={benefit.id} size={32} />
-        </div>
-      </div>
-      <h3
-        className={`font-display text-xl sm:text-2xl font-bold mb-2 ${
-          dark ? "text-cream" : "text-navy"
-        }`}
-      >
-        {benefit.title}
-      </h3>
-      <p
-        className={`font-body text-sm sm:text-base leading-relaxed mb-6 ${
-          dark ? "text-cream/70" : "text-navy/80"
-        }`}
-      >
-        {benefit.longDesc}
-      </p>
-
-      <p
-        className={`font-body text-xs font-semibold tracking-widest uppercase mb-3 ${
-          dark ? "text-cream/40" : "text-navy/50"
-        }`}
-      >
-        What You Get
-      </p>
-      <ul className="space-y-2">
-        {benefit.highlights.map((h, i) => (
-          <li key={i} className="flex gap-3 items-start">
-            <span className="mt-1 w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center shrink-0 text-amber">
-              <Check size={12} strokeWidth={3} />
-            </span>
-            <span
-              className={`font-body text-sm leading-relaxed ${
-                dark ? "text-cream/65" : "text-navy/75"
-              }`}
-            >
-              {h}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 /* ── Main component ──────────────────────────────────── */
@@ -119,7 +79,6 @@ export default function Membership({ content = DEFAULT_MEMBERSHIP_CONTENT }: { c
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
-  const [selected, setSelected] = useState<Benefit | null>(null);
 
   return (
     <section
@@ -166,47 +125,45 @@ export default function Membership({ content = DEFAULT_MEMBERSHIP_CONTENT }: { c
         </Reveal>
 
         <StaggerContainer
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
           stagger={0.1}
         >
           {content.benefits.map((b) => (
             <StaggerItem key={b.id}>
-              <ClickableCard onClick={() => setSelected(b)} cue="Learn more">
-                <div className="p-6 sm:p-8 text-center flex flex-col justify-between h-full">
-                  <div>
-                    {/* Centered Benefit Icon container */}
-                    <div className="mx-auto mb-5 w-fit relative">
-                      <motion.div
-                        className="w-16 h-16 rounded-full bg-cream/5 border border-white/20 dark:border-white/10 shadow-md flex items-center justify-center text-amber select-none group-hover:bg-amber/10 group-hover:border-amber/30 transition-all duration-300"
-                        whileHover={
-                          prefersReduced ? {} : { scale: 1.1, rotate: 5, transition: { duration: 0.2 } }
-                        }
-                      >
-                        <BenefitIcon icon={b.icon} id={b.id} size={28} className="text-amber group-hover:scale-110 transition-transform duration-300" />
-                      </motion.div>
-                    </div>
-
-                    <h3
-                      className={`font-display text-base sm:text-lg font-bold mb-2 group-hover:text-amber transition-colors ${
-                        dark ? "text-cream" : "text-navy"
-                      }`}
-                    >
-                      {b.title}
-                    </h3>
-                    <p
-                      className={`font-body text-sm leading-relaxed ${
-                        dark ? "text-cream/60" : "text-navy/75"
-                      }`}
-                    >
-                      {b.desc}
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-cream/5 mt-4 text-xs font-body text-amber/90 font-semibold group-hover:text-amber transition-colors inline-flex items-center gap-1.5">
-                    <span>Learn more</span>
-                    <ArrowRight size={13} className="shrink-0" />
+              <motion.div
+                className={`group relative h-full rounded-2xl border p-6 sm:p-8 transition-all duration-300 flex flex-col justify-start ${
+                  dark
+                    ? "bg-navy/60 backdrop-blur-sm border-cream/10 hover:border-amber/40 hover:bg-navy/80 hover:shadow-[0_16px_32px_rgba(255,168,41,0.08)]"
+                    : "bg-white/80 backdrop-blur-sm border-navy/10 hover:border-amber/40 hover:shadow-[0_16px_32px_rgba(10,38,57,0.08)]"
+                }`}
+                whileHover={prefersReduced ? {} : { y: -4 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Icon Container */}
+                <div className="mb-6 w-fit">
+                  <div className="w-14 h-14 rounded-2xl bg-amber/10 border border-amber/20 flex items-center justify-center text-amber shadow-sm group-hover:bg-amber/20 group-hover:border-amber/40 group-hover:scale-105 transition-all duration-300">
+                    <BenefitIcon icon={b.icon} id={b.id} size={26} className="text-amber" />
                   </div>
                 </div>
-              </ClickableCard>
+
+                {/* Header / Title */}
+                <h3
+                  className={`font-display text-lg sm:text-xl font-bold mb-3 group-hover:text-amber transition-colors ${
+                    dark ? "text-cream" : "text-navy"
+                  }`}
+                >
+                  {b.title}
+                </h3>
+
+                {/* Description */}
+                <p
+                  className={`font-body text-sm sm:text-base leading-relaxed ${
+                    dark ? "text-cream/70" : "text-navy/75"
+                  }`}
+                >
+                  {b.desc}
+                </p>
+              </motion.div>
             </StaggerItem>
           ))}
         </StaggerContainer>
@@ -323,14 +280,6 @@ export default function Membership({ content = DEFAULT_MEMBERSHIP_CONTENT }: { c
           ))}
         </StaggerContainer>
       </div>
-
-      <DetailModal
-        open={!!selected}
-        onClose={() => setSelected(null)}
-        title={selected?.title}
-      >
-        {selected && <BenefitDetail benefit={selected} />}
-      </DetailModal>
     </section>
   );
 }

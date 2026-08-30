@@ -44,50 +44,43 @@ const AVAILABLE_ICONS = [
   { value: "trophy", label: "Trophy" },
   { value: "chart", label: "Chart" },
   { value: "palette", label: "Palette" },
+  { value: "heart", label: "Heart" },
+  { value: "users", label: "Users" },
+  { value: "briefcase", label: "Briefcase" },
+  { value: "award", label: "Award" },
+  { value: "sparkles", label: "Sparkles" },
 ];
 
 export default function MembershipForm({ initial }: { initial: MembershipContent }) {
   const router = useRouter();
   const [form, setForm] = useState<MembershipContent>(initial);
-  const [activeTab, setActiveTab] = useState<"general" | "benefits" | "steps">("general");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<"general" | "benefits" | "steps">("general");
 
-  // Screenshot uploading states
   const [uploadingSteps, setUploadingSteps] = useState<Record<number, boolean>>({});
   const [uploadErrors, setUploadErrors] = useState<Record<number, string | null>>({});
 
   async function handleUploadScreenshot(idx: number, file: File) {
-    const step = form.joinSteps[idx];
-    setUploadErrors(prev => ({ ...prev, [idx]: null }));
-    
-    // Validate type
-    const allowed = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowed.includes(file.type)) {
-      setUploadErrors(prev => ({ ...prev, [idx]: "Invalid file type. Allowed: JPG, PNG, WebP." }));
-      return;
-    }
-    // Validate size (4 MB)
-    if (file.size > 4 * 1024 * 1024) {
-      setUploadErrors(prev => ({ ...prev, [idx]: "File too large. Maximum size is 4 MB." }));
-      return;
-    }
-
     setUploadingSteps(prev => ({ ...prev, [idx]: true }));
+    setUploadErrors(prev => ({ ...prev, [idx]: null }));
+
     try {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("stepNum", step.num);
+      const fd = new FormData();
+      fd.append("file", file);
 
-      const res = await fetch("/api/membership-content/screenshot", { method: "POST", body });
+      const res = await fetch("/api/membership-content/screenshot", {
+        method: "POST",
+        body: fd,
+      });
+
       const data = await res.json();
-
       if (!res.ok) {
         setUploadErrors(prev => ({ ...prev, [idx]: data.error || "Upload failed" }));
         return;
       }
-
+      
       updateStep(idx, { screenshotUrl: data.url });
     } catch {
       setUploadErrors(prev => ({ ...prev, [idx]: "Upload failed. Please try again." }));
@@ -113,9 +106,7 @@ export default function MembershipForm({ initial }: { initial: MembershipContent
       id: `new-benefit-${Date.now()}`,
       icon: "target",
       title: "New Benefit",
-      desc: "Short description.",
-      longDesc: "Detailed description.",
-      highlights: ["Highlight detail"],
+      desc: "Benefit description.",
     };
     updateField("benefits", [...form.benefits, newBenefit]);
   }
@@ -133,25 +124,6 @@ export default function MembershipForm({ initial }: { initial: MembershipContent
     next[index] = next[targetIndex];
     next[targetIndex] = temp;
     updateField("benefits", next);
-  }
-
-  // Benefit Highlights handlers
-  function updateHighlight(benefitIndex: number, highlightIndex: number, val: string) {
-    const b = form.benefits[benefitIndex];
-    const nextHighlights = [...b.highlights];
-    nextHighlights[highlightIndex] = val;
-    updateBenefit(benefitIndex, { highlights: nextHighlights });
-  }
-
-  function addHighlight(benefitIndex: number) {
-    const b = form.benefits[benefitIndex];
-    updateBenefit(benefitIndex, { highlights: [...b.highlights, ""] });
-  }
-
-  function removeHighlight(benefitIndex: number, highlightIndex: number) {
-    const b = form.benefits[benefitIndex];
-    const nextHighlights = b.highlights.filter((_, i) => i !== highlightIndex);
-    updateBenefit(benefitIndex, { highlights: nextHighlights });
   }
 
   // Steps handlers
@@ -382,7 +354,7 @@ export default function MembershipForm({ initial }: { initial: MembershipContent
                       required
                     />
                   </Field>
-                  <Field label="Benefit Title">
+                  <Field label="Benefit Title (Header)">
                     <input
                       className={INPUT}
                       value={b.title}
@@ -403,8 +375,8 @@ export default function MembershipForm({ initial }: { initial: MembershipContent
                   </Field>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Short Summary Description">
+                <div>
+                  <Field label="Description">
                     <textarea
                       className={TEXTAREA}
                       value={b.desc}
@@ -412,52 +384,6 @@ export default function MembershipForm({ initial }: { initial: MembershipContent
                       required
                     />
                   </Field>
-                  <Field label="Expanded Description (Modal)">
-                    <textarea
-                      className={TEXTAREA}
-                      value={b.longDesc}
-                      onChange={(e) => updateBenefit(idx, { longDesc: e.target.value })}
-                      required
-                    />
-                  </Field>
-                </div>
-
-                {/* Highlights List */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between items-center">
-                    <label className={LABEL}>What You Get (Bullet Highlights)</label>
-                    <button
-                      type="button"
-                      onClick={() => addHighlight(idx)}
-                      className="text-amber hover:text-amber/80 text-xs font-semibold"
-                    >
-                      + Add Point
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {b.highlights.map((h, hIdx) => (
-                      <div key={hIdx} className="flex gap-2 items-center">
-                        <span className="w-6 h-6 rounded-full bg-amber/10 border border-amber/20 text-amber flex items-center justify-center font-display text-[9px] font-bold shrink-0">
-                          {hIdx + 1}
-                        </span>
-                        <input
-                          className={INPUT}
-                          value={h}
-                          onChange={(e) => updateHighlight(idx, hIdx, e.target.value)}
-                          placeholder="e.g. Access to exclusive WhatsApp community"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeHighlight(idx, hIdx)}
-                          className="px-2.5 py-2 text-xs font-bold rounded bg-red-950/20 border border-red-800/20 text-red-400/80 hover:bg-red-900/30 transition-all shrink-0"
-                          title="Remove Point"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             ))}
