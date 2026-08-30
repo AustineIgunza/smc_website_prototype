@@ -4,7 +4,7 @@
 > **What this doc is:** The *runtime* view of the system — how the pieces fit together, how a request flows end to end, how it's deployed, and how it's secured.
 > **Companion doc:** [`SCHEMA.md`](SCHEMA.md) holds the *structural* reference (database tables, field-by-field, full API list). This doc links to it instead of repeating it.
 >
-> **Last updated:** 2026-06-03 · **Maintainers:** SMC dev team · **If you change how the system works, update this file in the same PR.**
+> **Last updated:** 2026-08-30 · **Maintainers:** SMC dev team · **If you change how the system works, update this file in the same PR.**
 
 ---
 
@@ -28,15 +28,15 @@
 
 ## 1. Architecture at a glance
 
-A single **Next.js 16** application (App Router) deployed to **Vercel**, talking to a **PostgreSQL** database (**Supabase**) through **Prisma**. There is no separate backend service — the API lives inside the same Next app as route handlers.
+A single **Next.js 16** application (App Router) deployed to **Vercel**, talking to a **PostgreSQL** database (**Supabase**). There is no separate backend service — the API lives inside the same Next app as route handlers. Application code reads and writes through the **Supabase client**; Prisma remains as the **schema, migration, and seeding** tool only.
 
 | Concern | Approach |
 |---|---|
 | App model | One Next.js app: server-rendered pages + colocated API route handlers. |
-| Auth | **None.** No accounts, passwords, or sessions — event RSVP is **anonymous** (name + email captured per event). |
-| Data | Prisma ORM. **Postgres** in prod, **SQLite** for offline dev (chosen at runtime by `DATABASE_URL`). |
-| Content | **Hybrid:** events come from the DB; team/portfolio/membership are static files in the repo (see [§7](#7-data-architecture)). |
-| Runtime | All app code runs as **Node** serverless functions (page render + API); the browser runs the client islands. **No Edge middleware.** |
+| Auth | **Supabase Auth** for the admin portal, enforced by `src/middleware.ts` over `/admin/*`. The **public** side stays anonymous — event RSVP needs no account. |
+| Data | **Supabase client** (`@supabase/supabase-js` / `@supabase/ssr`) at runtime. **Prisma** owns `schema.prisma`, migrations, and the seed script. |
+| Content | **Mostly DB-backed:** events, past events, portfolio, team, and homepage copy all live in Postgres and are edited through `/admin`. Only `membership` and shared config (e.g. category taxonomies) remain static (see [§7](#7-data-architecture)). |
+| Runtime | All app code runs as **Node** serverless functions (page render + API); the browser runs the client islands. **Middleware** runs on `/admin/*` to refresh the Supabase session and gate access. |
 | Deploy | Git push → Vercel build (`prisma generate` + `next build`) → serverless deploy. |
 
 ---
@@ -58,7 +58,7 @@ flowchart TB
     fonts["Google Fonts<br/>(build-time)"]
 
     visitor -->|HTTPS| app
-    app -->|Prisma over TCP| db
+    app -->|Supabase client| db
     app -.->|STK push / callbacks| mpesa
     app -->|self-hosted at build| fonts
 
@@ -66,13 +66,13 @@ flowchart TB
     class mpesa future;
 ```
 
-Dashed = planned, not built. There is **no admin/member actor** — every visitor is anonymous. See [`SCHEMA.md` §12](SCHEMA.md#12-roadmap--phases) for phases.
+Dashed = planned, not built. Public visitors are anonymous; **admins** authenticate through Supabase Auth to reach `/admin/*`. See [`SCHEMA.md` §12](SCHEMA.md#12-roadmap--phases) for phases.
 
 ---
 
 ## 3. Containers & runtimes
 
-The "one app" runs across **two runtime contexts** — the browser and Vercel's Node serverless functions. (There is **no Edge middleware**: route protection was removed along with authentication.)
+The "one app" runs across **two runtime contexts** — the browser and Vercel's Node serverless functions — plus **middleware** on `/admin/*`, which refreshes the Supabase session and redirects unauthenticated visitors to `/admin/login`.
 
 ```mermaid
 flowchart LR
@@ -97,9 +97,9 @@ flowchart LR
 | Runtime | Runs | Why it matters |
 |---|---|---|
 | **Node serverless** (Server Components + `/api/*`) | Page rendering, all DB access, RSVP handling, Zod validation. | Full Node APIs available. Each invocation is **stateless** — no in-memory state survives between requests. |
-| **Browser** (`"use client"` components) | Interactivity: nav, theme, events list, the RSVP form. | Talks back to the server via `fetch('/api/*')`. **No client auth library** — nothing tracks a logged-in user. |
+| **Browser** (`"use client"` components) | Interactivity: nav, theme, events list, portfolio grid, the RSVP form. | Talks back to the server via `fetch('/api/*')`. The Supabase browser client handles the **admin login** session only. |
 
-> ℹ️ Every `/api/*` route is **public**. The RSVP handler does not trust client state — it re-validates the body, re-checks capacity, and enforces email dedupe **server-side** on every call.
+> ℹ️ `GET` routes are **public** and return published records only. Every **write** (`POST`/`PATCH`/`DELETE`) on the admin APIs calls `supabase.auth.getUser()` and returns `401` without a session. The RSVP handler stays public and does not trust client state — it re-validates the body, re-checks capacity, and enforces email dedupe **server-side** on every call.
 
 ---
 
@@ -132,12 +132,13 @@ flowchart TB
 | Layer | Folder | Responsibility |
 |---|---|---|
 | Presentation | `src/app/**/page.tsx`, `src/components/` | Render UI; client islands handle interaction. |
-| Routing & API | `src/app/api/` | HTTP entry points (all public, no guards). |
+| Routing & API | `src/app/api/` | HTTP entry points. Public reads; writes guarded by a Supabase session check. |
 | Domain / backend | `src/backend/validators/` | Input validation (Zod). |
-| Data access | `src/backend/db/` | Single Prisma client; seeding. |
-| Persistence | Postgres / SQLite | Source of truth for events, registrations, payments. |
+| Data access | `src/lib/supabase/` | Request-scoped Supabase clients (`server.ts` / `client.ts`). |
+| Schema & seeding | `src/backend/db/`, `prisma/` | Prisma schema, migrations, and the seed script. |
+| Persistence | Supabase Postgres | Source of truth for events, projects, team, registrations, payments. |
 
-Rule of thumb: **components never touch Prisma directly.** They call `/api/*`; the handler validates, then uses Prisma.
+Rule of thumb: **client components never query the database directly.** They call `/api/*`; the handler validates, then uses the Supabase client. Server components may query Supabase directly via `src/lib/supabase/server.ts`.
 
 ---
 
@@ -166,7 +167,7 @@ State propagation:
 - **Data fetching** — the events page is a thin server component that renders the `Events` client component, which fetches `/api/events` on mount (client-side). It is **not** server-rendered with data; it hydrates then fetches.
 - **RSVP form state** — the RSVP form (name / email / optional phone) is **local component state** inside `Events.tsx`. On submit it POSTs to `/api/events/[slug]/rsvp` and renders a success or error state inline; there is no global/session state involved.
 
-> There is no `SessionProvider` and no `useSession()` — the Navbar shows a single static "Join the Club" link (→ `/membership`), not a sign-in/out toggle.
+> The **public** Navbar shows a single static "Join the Club" link (→ `/membership`), not a sign-in/out toggle — public pages never read auth state. Admin session handling lives entirely in `src/middleware.ts` and the `/admin` route group.
 
 ---
 
@@ -257,12 +258,13 @@ Full table-by-table detail lives in [`SCHEMA.md` §5](SCHEMA.md#5-database-schem
 
 | Content | Source | Edited by |
 |---|---|---|
-| Events + registrations + (future) payments | **Database** (Prisma) | Seed script / DB tools / future admin UI |
-| Team, Portfolio, Membership copy | **Static TS files** in `src/data/` | Code change + redeploy |
+| Events, past events, registrations, payments | **Database** | `/admin` UI, seed script, DB tools |
+| Portfolio projects, Team members, Homepage copy | **Database** | `/admin` UI, seed script |
+| Membership copy, category taxonomies | **Static TS files** in `src/data/` | Code change + redeploy |
 
-This keeps marketing copy in version control (easy PR review, no DB needed) while making the transactional events flow dynamic. `src/data/events.ts` is **legacy/unused** — events render from the DB now.
+Editable content moved into the database so officers can update it through `/admin` without a redeploy. What remains in `src/data/` is either rarely-changing copy (`membership.ts`) or shared config the code depends on (`eventCategories.ts`, `projectCategories.ts`). `src/data/events.ts` is **legacy/unused** — events render from the DB now.
 
-**2. Runtime adapter switch.** A single lazy Prisma singleton ([`src/backend/db/prisma.ts`](src/backend/db/prisma.ts)) picks its driver from `DATABASE_URL`:
+**2. Runtime adapter switch.** Prisma is no longer on the request path, but the seed and migration tooling still uses a lazy Prisma singleton ([`src/backend/db/prisma.ts`](src/backend/db/prisma.ts)) that picks its driver from `DATABASE_URL`:
 
 ```mermaid
 flowchart LR
@@ -277,15 +279,16 @@ The client is created on first use and cached on `globalThis` so dev hot-reloads
 
 ## 8. Security architecture
 
-With **no authentication**, the system has no passwords, sessions, or login attack surface to defend. The flip side: the RSVP endpoint is **open to the public**, so the security focus shifts to **input integrity and abuse resistance** on that one write path.
+The system has **two trust zones**: a fully public site (browse + RSVP, no account) and an **authenticated admin portal** backed by Supabase Auth. Security work therefore splits between **guarding admin writes** and **input integrity / abuse resistance** on the public RSVP path.
 
 | Control | Where | Detail |
 |---|---|---|
+| **Admin access** | `src/middleware.ts` | Every `/admin/*` path except `/admin/login` requires a Supabase session, else redirect to login. Admin API writes independently re-check `supabase.auth.getUser()` → `401`. |
 | **Input validation** | `validators/rsvp.ts` (Zod) | RSVP payload (`name` ≥ 2, valid `email`, optional `phone`) validated before any DB work; invalid → `400`. |
 | **RSVP dedupe** | rsvp handler + DB unique | `@@unique([eventId, guestEmail])`; email lowercased. One active RSVP per email per event; duplicate → `409`. |
 | **Capacity integrity** | rsvp handler | Active-registration re-count **inside a Prisma `$transaction`** prevents overbooking races. |
 | **Money integrity** | schema | Currency stored as integer KES — no float rounding. |
-| **Secrets** | env vars | `DATABASE_URL`, `MPESA_*` injected via Vercel/`.env`; `.env` is gitignored. |
+| **Secrets** | env vars | `DATABASE_URL`, `MPESA_*` injected via Vercel/`.env`; `.env` is gitignored. `NEXT_PUBLIC_SUPABASE_*` are publishable by design — the anon key is safe to ship, so row protection must not rely on it staying secret. |
 
 **Trust boundary:** the browser is untrusted → the RSVP API re-validates the body, re-checks capacity, and enforces dedupe **server-side** on every request. Nothing relies on client-supplied state being honest.
 
@@ -336,10 +339,10 @@ flowchart LR
 ## 11. Scalability & performance
 
 - **Fully stateless functions** → there's no session store or server-side state to share, so any function instance can serve any request; horizontal scale is trivial.
-- **Connection management** → the lazy global Prisma singleton avoids connection storms; under serverless load use the Supabase **transaction pooler** to keep Postgres connection counts sane.
+- **Connection management** → runtime traffic goes over Supabase's HTTP API rather than raw Postgres connections, which sidesteps serverless connection storms; the pooler settings still matter for Prisma migrations and seeding.
 - **Overbooking protection** → capacity enforced inside a DB transaction (re-count before insert), not just an app-level check.
-- **Static content** → team/portfolio/membership ship as JS, no DB round-trip.
-- **Watch-outs** → the events list fetches client-side after hydration (no SSR data, brief "Loading events…"); consider server-rendering or caching `/api/events` if the list grows or SEO matters.
+- **Static content** → membership copy and category taxonomies ship as JS, no DB round-trip.
+- **Watch-outs** → the events and portfolio grids fetch client-side after hydration (no SSR data, so skeletons show first and the cards are invisible to crawlers). Individual case studies at `/portfolio/[slug]` **are** server-rendered; consider the same for the listing pages if SEO matters.
 
 ---
 
