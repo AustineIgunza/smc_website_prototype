@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, FormEvent, useEffect, useRef } from "react";
+import { useState, FormEvent, useRef, useCallback, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Trash2 } from "@/components/icons";
+import { Sparkles, Trash2, UploadCloud } from "@/components/icons";
+import { PROJECT_CATEGORIES } from "@/data/projectCategories";
 
 export interface ProjectFormData {
   slug: string;
@@ -36,6 +37,8 @@ interface Props {
 /* ── Shared input classes ─────────────────────────────── */
 const INPUT =
   "w-full px-4 py-2.5 rounded-lg bg-cream/5 border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber placeholder:text-cream/25 transition-colors";
+const SELECT =
+  "w-full px-4 py-2.5 rounded-lg bg-teal border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber transition-colors";
 const TEXTAREA = INPUT + " resize-y min-h-[100px]";
 const LABEL =
   "block font-body text-xs font-semibold text-cream/40 uppercase tracking-widest mb-1.5";
@@ -104,26 +107,6 @@ function toSlug(title: string) {
     .replace(/^-|-$/g, "");
 }
 
-/* ── Cover image preview ──────────────────────────────── */
-function CoverPreview({ url }: { url: string }) {
-  const [valid, setValid] = useState(false);
-  useEffect(() => {
-    if (!url) { setValid(false); return; }
-    const img = new Image();
-    img.onload = () => setValid(true);
-    img.onerror = () => setValid(false);
-    img.src = url;
-  }, [url]);
-
-  if (!valid || !url) return null;
-  return (
-    <div
-      className="mt-2 w-full h-32 rounded-xl bg-cover bg-center border border-cream/10"
-      style={{ backgroundImage: `url(${url})` }}
-    />
-  );
-}
-
 /* ── Main form ────────────────────────────────────────── */
 export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, isEdit }: Props) {
   const router = useRouter();
@@ -132,7 +115,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
   const [form, setForm] = useState<ProjectFormData>({
     slug: initial?.slug ?? "",
     title: initial?.title ?? "",
-    category: initial?.category ?? "",
+    category: initial?.category ?? PROJECT_CATEGORIES[0].id,
     clientName: initial?.clientName ?? "",
     duration: initial?.duration ?? "",
     status: initial?.status ?? "DRAFT",
@@ -153,6 +136,61 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = useCallback(async (file: File) => {
+    setUploadError(null);
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setUploadError("Invalid file type. Allowed: JPG, PNG, WebP.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("File too large. Maximum size is 2 MB.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("projectId", isEdit ? "edit" : "new");
+
+      const res = await fetch("/api/projects/image", { method: "POST", body });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setUploadError(data.error || "Upload failed");
+        return;
+      }
+      setForm((prev) => ({ ...prev, coverImageUrl: data.url }));
+    } catch {
+      setUploadError("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }, [isEdit]);
+
+  const onDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileUpload(file);
+  }, [handleFileUpload]);
+
+  const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileUpload(file);
+    e.target.value = "";
+  }, [handleFileUpload]);
+
+  const removeImage = useCallback(() => {
+    setForm((prev) => ({ ...prev, coverImageUrl: "" }));
+    setUploadError(null);
+  }, []);
 
   function set<K extends keyof ProjectFormData>(key: K, value: ProjectFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -235,21 +273,24 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
             className={`${INPUT} ${isEdit ? "opacity-40 cursor-not-allowed" : ""}`}
           />
           <p className="font-body text-cream/30 text-xs mt-1">
-            URL: /portfolio#{form.slug || "…"}
+            URL: /portfolio/{form.slug || "…"}
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label className={LABEL}>Category</label>
-            <input
-              type="text"
+            <select
               value={form.category}
               onChange={(e) => set("category", e.target.value)}
-              required
-              placeholder="e.g. Branding"
-              className={INPUT}
-            />
+              className={SELECT}
+            >
+              {PROJECT_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className={LABEL}>Client name</label>
@@ -335,8 +376,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
           <textarea
             value={form.problem}
             onChange={(e) => set("problem", e.target.value)}
-            required
-            placeholder="What challenge did the client face?"
+            placeholder="What challenge did the client face? (optional)"
             className={TEXTAREA}
           />
         </div>
@@ -345,8 +385,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
           <textarea
             value={form.approach}
             onChange={(e) => set("approach", e.target.value)}
-            required
-            placeholder="How did the team tackle it?"
+            placeholder="How did the team tackle it? (optional)"
             className={TEXTAREA}
           />
         </div>
@@ -355,8 +394,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
           <textarea
             value={form.outcome}
             onChange={(e) => set("outcome", e.target.value)}
-            required
-            placeholder="What were the results?"
+            placeholder="What were the results? (optional)"
             className={TEXTAREA}
           />
         </div>
@@ -406,15 +444,69 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
       {/* ── Section 4: Media & Links ── */}
       <Section title="Media & Links">
         <div>
-          <label className={LABEL}>Cover image URL</label>
+          <label className={LABEL}>Cover image</label>
+
+          {form.coverImageUrl ? (
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <img
+                  src={form.coverImageUrl}
+                  alt="Cover preview"
+                  className="w-24 h-24 rounded-lg object-cover border-2 border-amber/40 shadow-lg"
+                />
+                <div className="absolute inset-0 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="text-white text-xs font-body font-semibold px-2 py-1 rounded bg-red-600/80 hover:bg-red-600 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="font-body text-sm text-cream/60">Cover image uploaded</p>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="font-body text-xs text-amber hover:text-amber/80 underline underline-offset-2 transition-colors"
+                >
+                  Replace image
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={onDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative flex flex-col items-center justify-center gap-2 py-8 px-4 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 ${
+                dragOver
+                  ? "border-amber bg-amber/10"
+                  : "border-cream/20 hover:border-cream/40 bg-cream/5"
+              } ${uploading ? "pointer-events-none opacity-60" : ""}`}
+            >
+              <UploadCloud className="w-8 h-8 text-cream/30" strokeWidth={1.5} />
+              <p className="font-body text-sm text-cream/50">
+                {uploading ? "Uploading…" : "Drag & drop or click to upload cover image"}
+              </p>
+              <p className="font-body text-[10px] text-cream/30">
+                Max 2 MB · JPG, PNG, or WebP
+              </p>
+            </div>
+          )}
+
           <input
-            type="url"
-            value={form.coverImageUrl}
-            onChange={(e) => set("coverImageUrl", e.target.value)}
-            placeholder="https://…"
-            className={INPUT}
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={onFileChange}
           />
-          <CoverPreview url={form.coverImageUrl} />
+          {uploadError && (
+            <p className="font-body text-red-400 text-xs mt-2">{uploadError}</p>
+          )}
         </div>
 
         <div>
