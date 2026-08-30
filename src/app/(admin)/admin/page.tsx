@@ -22,6 +22,7 @@ export default async function AdminDashboardPage() {
     membershipRow,
     { count: totalPastEvents },
     { count: publishedPastEvents },
+    partnershipsRow,
   ] = await Promise.all([
     supabase.from("Project").select("*", { count: "exact", head: true }),
     supabase.from("Project").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
@@ -36,6 +37,7 @@ export default async function AdminDashboardPage() {
     supabase.from("MembershipContent").select("updatedAt").eq("id", "membership").maybeSingle(),
     supabase.from("PastEvent").select("*", { count: "exact", head: true }),
     supabase.from("PastEvent").select("*", { count: "exact", head: true }).eq("status", "PUBLISHED"),
+    supabase.from("PartnershipsContent").select("updatedAt").eq("id", "partnerships").maybeSingle(),
   ]);
 
   const homeUpdatedLabel = homeRow.data?.updatedAt
@@ -48,6 +50,14 @@ export default async function AdminDashboardPage() {
 
   const membershipUpdatedLabel = membershipRow.data?.updatedAt
     ? `Last saved ${new Date(membershipRow.data.updatedAt as string).toLocaleDateString("en-KE", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`
+    : "Not saved yet";
+
+  const partnershipsUpdatedLabel = partnershipsRow.data?.updatedAt
+    ? `Last saved ${new Date(partnershipsRow.data.updatedAt as string).toLocaleDateString("en-KE", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -73,6 +83,14 @@ export default async function AdminDashboardPage() {
       stats: [],
       meta: membershipUpdatedLabel,
       cta: "Edit membership →",
+    },
+    {
+      href: "/admin/partnerships",
+      label: "Partnerships",
+      description: "Manage internal university alliances and external corporate partners.",
+      stats: [],
+      meta: partnershipsUpdatedLabel,
+      cta: "Manage partnerships →",
     },
     {
       href: "/admin/projects",

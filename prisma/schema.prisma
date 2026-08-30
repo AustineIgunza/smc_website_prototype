@@ -232,3 +232,15 @@ model PastEvent {
   updatedAt          DateTime    @updatedAt
 }
 
+// Singleton row (id = "partnerships") holding all editable partnerships copy.
+model PartnershipsContent {
+  id               String   @id @default("partnerships")
+  title            String   @default("Partnerships")
+  subtitle         String   @default("Internal & External Collaborations")
+  description      String   @default("Connecting Strathmore Marketing Club with industry leaders and university pillars.")
+  internalPartners Json     // List of InternalPartner objects
+  externalPartners Json     // List of ExternalPartner objects
+  updatedAt        DateTime @updatedAt
+}
+
+

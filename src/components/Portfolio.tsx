@@ -14,6 +14,8 @@ import {
   PROJECT_CATEGORIES,
   getProjectCategoryLabel,
 } from "@/data/projectCategories";
+import PartnershipsSection from "./portfolio/PartnershipsSection";
+import type { PartnershipsContent } from "@/data/partnerships";
 
 export type { Project };
 
@@ -40,7 +42,11 @@ function SkeletonCard({ dark }: { dark: boolean }) {
 }
 
 /* ── Main component ──────────────────────────────────── */
-export default function Portfolio() {
+export default function Portfolio({
+  partnershipsContent,
+}: {
+  partnershipsContent?: PartnershipsContent;
+} = {}) {
   const { theme } = useTheme();
   const dark = theme === "dark";
   const prefersReduced = useReducedMotion();
@@ -300,6 +306,9 @@ export default function Portfolio() {
             </motion.p>
           )}
         </AnimatePresence>
+
+        {/* ── Partnerships Section ────────────────────────── */}
+        <PartnershipsSection content={partnershipsContent} />
       </div>
 
       <DetailModal

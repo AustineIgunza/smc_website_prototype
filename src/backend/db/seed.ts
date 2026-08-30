@@ -5,6 +5,7 @@ import { PrismaClient, EventType, EventStatus, OwnerType, ProjectStatus } from "
 import { portfolioProjects, legacyProjectSlugs } from "./portfolioProjects";
 import type { Prisma } from "@prisma/client";
 import { team } from "../../data/team";
+import { DEFAULT_PARTNERSHIPS_CONTENT } from "../../data/partnerships";
 
 function createPrismaClient() {
   const url = process.env.DATABASE_URL!;
@@ -180,6 +181,23 @@ async function main() {
     });
   }
   console.log(`Created ${team.length} team members`);
+
+  // Seed Partnerships Content
+  console.log("Seeding partnerships content...");
+  await prisma.partnershipsContent.upsert({
+    where: { id: "partnerships" },
+    update: {},
+    create: {
+      id: "partnerships",
+      title: DEFAULT_PARTNERSHIPS_CONTENT.title,
+      subtitle: DEFAULT_PARTNERSHIPS_CONTENT.subtitle,
+      description: DEFAULT_PARTNERSHIPS_CONTENT.description,
+      internalPartners: DEFAULT_PARTNERSHIPS_CONTENT.internalPartners as any,
+      externalPartners: DEFAULT_PARTNERSHIPS_CONTENT.externalPartners as any,
+    },
+  });
+  console.log("Seeded partnerships content");
+
   console.log("\nSeed complete!");
 }
 

@@ -102,6 +102,18 @@ export default function AdminNav() {
           >
             Team
           </Link>
+          <Link
+            href="/admin/partnerships"
+            className={`font-body text-xs font-semibold tracking-wide transition-colors ${
+              pathname.startsWith("/admin/partnerships")
+                ? "text-amber"
+                : dark
+                ? "text-teal/70 hover:text-teal"
+                : "text-cream/70 hover:text-cream"
+            }`}
+          >
+            Partnerships
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
