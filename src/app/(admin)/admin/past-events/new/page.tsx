@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import PastEventForm, { PastEventSubmitPayload } from "../PastEventForm";
 import { ArrowLeft } from "@/components/icons";
@@ -52,6 +53,11 @@ export default async function NewPastEventPage() {
     });
 
     if (error) return { error: error.message };
+
+    revalidatePath("/admin/past-events");
+    revalidatePath("/events/past");
+    revalidatePath("/");
+
     return {};
   }
 

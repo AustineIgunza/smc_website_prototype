@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, FormEvent, ChangeEvent } from "react";
+import { useState, useEffect, useRef, useCallback, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   UploadCloud,
@@ -11,6 +11,7 @@ import {
   Images,
   ArrowLeft,
 } from "@/components/icons";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 
 export interface PastEventSubmitPayload {
   slug: string;
@@ -89,8 +90,14 @@ export default function PastEventForm({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+
+  // Prefetch past events list page for fast navigation
+  useEffect(() => {
+    router.prefetch("/admin/past-events");
+  }, [router]);
 
   // Auto-generate slug from title
   const handleTitleChange = (val: string) => {
@@ -192,22 +199,20 @@ export default function PastEventForm({
       setLoading(false);
     } else {
       router.push("/admin/past-events");
-      router.refresh();
     }
   };
 
   const handleDelete = async () => {
-    if (!onDelete || !confirm("Are you sure you want to permanently delete this past event archive?")) {
-      return;
-    }
+    if (!onDelete) return;
     setDeleting(true);
+    setError(null);
     try {
       await onDelete();
       router.push("/admin/past-events");
-      router.refresh();
     } catch {
       setError("Failed to delete event.");
       setDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -396,7 +401,7 @@ export default function PastEventForm({
               <button
                 type="button"
                 disabled={deleting}
-                onClick={handleDelete}
+                onClick={() => setShowDeleteModal(true)}
                 className="px-5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 font-body font-semibold text-sm hover:bg-red-500 hover:text-white transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 <Trash2 size={16} />
@@ -414,6 +419,16 @@ export default function PastEventForm({
           </div>
         </div>
       </Section>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Past Event Archive"
+        itemName={form.title || "this past event"}
+        description="Are you sure you want to permanently delete this past event archive? This cannot be undone. All photos and recaps associated with this event will be removed."
+        isDeleting={deleting}
+      />
     </form>
   );
 }

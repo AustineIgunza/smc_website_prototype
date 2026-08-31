@@ -1,18 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-function supabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const db = supabase();
-
-  const { data: pastEvents, error } = await db
+  const { data: pastEvents, error } = await supabase
     .from("PastEvent")
-    .select("*")
+    .select("id, slug, title, description, category, date, location, attendanceCount, coverImageUrl, galleryUrls, status")
     .eq("status", "PUBLISHED")
     .order("date", { ascending: false });
 

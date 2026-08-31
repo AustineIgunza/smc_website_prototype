@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { pastEventSchema } from "@/backend/validators/pastEvent";
 
@@ -49,6 +50,11 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath("/admin/past-events");
+  revalidatePath("/events/past");
+  revalidatePath("/");
+
   return NextResponse.json({ pastEvent });
 }
 
@@ -68,5 +74,10 @@ export async function DELETE(
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath("/admin/past-events");
+  revalidatePath("/events/past");
+  revalidatePath("/");
+
   return NextResponse.json({ ok: true });
 }

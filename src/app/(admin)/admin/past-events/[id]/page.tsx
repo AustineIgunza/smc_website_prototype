@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import PastEventForm, { PastEventSubmitPayload } from "../PastEventForm";
 import { ArrowLeft } from "@/components/icons";
@@ -56,6 +57,11 @@ export default async function EditPastEventPage({ params }: Props) {
       });
 
     if (error) return { error: error.message };
+
+    revalidatePath("/admin/past-events");
+    revalidatePath("/events/past");
+    revalidatePath("/");
+
     return {};
   }
 
@@ -73,6 +79,10 @@ export default async function EditPastEventPage({ params }: Props) {
       .eq("id", id);
 
     if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/past-events");
+    revalidatePath("/events/past");
+    revalidatePath("/");
   }
 
   return (

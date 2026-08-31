@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, FormEvent, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { UploadCloud, Trash2, X } from "@/components/icons";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 
 export interface TeamMemberSubmitPayload {
   name: string;
@@ -37,8 +38,8 @@ interface Props {
 
 /* ── Shared input classes ─────────────────────────────── */
 const INPUT =
-  "w-full px-4 py-2.5 rounded-lg bg-cream/5 border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber placeholder:text-cream/25 transition-colors";
-const TEXTAREA = INPUT + " resize-y min-h-[120px]";
+  "w-full px-4 py-2.5 rounded-lg bg-cream/5 border border-cream/15 text-cream font-body text-sm outline-none focus:border-amber placeholder:text-cream/25 transition-colors disabled:opacity-50";
+const TEXTAREA = INPUT + " resize-y min-h-[100px]";
 const LABEL =
   "block font-body text-xs font-semibold text-cream/40 uppercase tracking-widest mb-1.5";
 
@@ -60,19 +61,20 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
 
   const [form, setForm] = useState<TeamMemberFormData>({
     name: initial?.name ?? "",
-    role: initial?.role ?? "",
+    role: initial?.role ?? "MEMBER",
     title: initial?.title ?? "",
     course: initial?.course ?? "",
-    year: initial?.year ?? "",
+    year: initial?.year ?? "1st Year",
     bio: initial?.bio ?? "",
-    gradientStart: initial?.gradientStart ?? "#FFA829",
-    gradientEnd: initial?.gradientEnd ?? "#CC8802",
+    gradientStart: initial?.gradientStart ?? "#0D3B4C",
+    gradientEnd: initial?.gradientEnd ?? "#FFA829",
     avatarUrl: initial?.avatarUrl ?? "",
   });
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -87,9 +89,9 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
       setUploadError("Invalid file type. Allowed: JPG, PNG, WebP.");
       return;
     }
-    // Validate size (2 MB)
-    if (file.size > 2 * 1024 * 1024) {
-      setUploadError("File too large. Maximum size is 2 MB.");
+    // Validate size (4 MB)
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError("File too large. Maximum size is 4 MB.");
       return;
     }
 
@@ -97,6 +99,7 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
     try {
       const body = new FormData();
       body.append("file", file);
+      body.append("teamMemberId", isEdit ? "edit" : "new");
 
       const res = await fetch("/api/team/avatar", { method: "POST", body });
       const data = await res.json();
@@ -112,7 +115,7 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
     } finally {
       setUploading(false);
     }
-  }, []);
+  }, [isEdit]);
 
   const onDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -165,14 +168,17 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
 
   async function handleDelete() {
     if (!onDelete) return;
-    const isAutomated = typeof window !== "undefined" && window.navigator.webdriver;
-    if (!isAutomated) {
-      if (!confirm(`Delete ${form.name || "this team member"}? This cannot be undone.`)) return;
-    }
     setDeleting(true);
-    await onDelete();
-    router.push("/admin/team");
-    router.refresh();
+    setError(null);
+    try {
+      await onDelete();
+      router.push("/admin/team");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete team member");
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   }
 
   return (
@@ -397,14 +403,24 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
         {onDelete && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             disabled={deleting}
-            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {deleting ? "Deleting…" : "Delete"}
           </button>
         )}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Team Member"
+        itemName={form.name || "this team member"}
+        description="Are you sure you want to permanently delete this team member profile? This cannot be undone."
+        isDeleting={deleting}
+      />
     </form>
   );
 }

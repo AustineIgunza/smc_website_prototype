@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useCallback, FormEvent, DragEvent, ChangeEvent } from "react";
+import { useState, useEffect, useRef, useCallback, FormEvent, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ImageIcon, UploadCloud, Trash2, X } from "@/components/icons";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 
 export interface EventSubmitPayload {
   slug: string;
@@ -90,9 +91,15 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Prefetch events list page for fast navigation
+  useEffect(() => {
+    router.prefetch("/admin/events");
+  }, [router]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     setUploadError(null);
@@ -195,24 +202,20 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
       setLoading(false);
     } else {
       router.push("/admin/events");
-      router.refresh();
     }
   }
 
   async function handleDelete() {
     if (!onDelete) return;
-    const isAutomated = typeof window !== "undefined" && window.navigator.webdriver;
-    if (!isAutomated) {
-      if (!confirm(`Delete ${form.title || "this event"}? This cannot be undone.`)) return;
-    }
     setDeleting(true);
+    setError(null);
     try {
       await onDelete();
       router.push("/admin/events");
-      router.refresh();
     } catch (err: any) {
       setError(err.message || "Failed to delete event");
       setDeleting(false);
+      setShowDeleteModal(false);
     }
   }
 
@@ -465,14 +468,24 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
         {onDelete && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             disabled={deleting}
-            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {deleting ? "Deleting…" : "Delete"}
           </button>
         )}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Event"
+        itemName={form.title || "this event"}
+        description="Are you sure you want to permanently delete this event? This cannot be undone. All registered attendees and associated records for this event will be deleted."
+        isDeleting={deleting}
+      />
     </form>
   );
 }

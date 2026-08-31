@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { eventUpdateSchema } from "@/backend/validators/event";
 
@@ -27,6 +28,11 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+
   return NextResponse.json({ event });
 }
 
@@ -40,25 +46,23 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // Check if there are registrations before deleting (cascade check)
-  const { data: regs } = await supabase
-    .from("Registration")
-    .select("id")
-    .eq("eventId", id)
-    .limit(1);
+  // 1. Delete associated payments and registrations concurrently
+  await Promise.all([
+    supabase.from("Payment").delete().eq("eventId", id),
+    supabase.from("Registration").delete().eq("eventId", id),
+  ]);
 
-  if (regs && regs.length > 0) {
-    return NextResponse.json(
-      { error: "Cannot delete an event that already has registrations. Cancel it instead." },
-      { status: 400 }
-    );
-  }
-
+  // 2. Delete the event itself
   const { error } = await supabase
     .from("Event")
     .delete()
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+
   return NextResponse.json({ ok: true });
 }

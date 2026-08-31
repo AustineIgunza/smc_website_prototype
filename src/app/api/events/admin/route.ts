@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { eventSchema } from "@/backend/validators/event";
 
@@ -34,5 +35,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+
   return NextResponse.json({ event }, { status: 201 });
 }

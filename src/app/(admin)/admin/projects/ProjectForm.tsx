@@ -4,6 +4,7 @@ import { useState, FormEvent, useRef, useCallback, DragEvent, ChangeEvent } from
 import { useRouter } from "next/navigation";
 import { Sparkles, Trash2, UploadCloud } from "@/components/icons";
 import { PROJECT_CATEGORIES } from "@/data/projectCategories";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 
 export interface ProjectFormData {
   slug: string;
@@ -136,6 +137,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -219,11 +221,8 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
 
   async function handleDelete() {
     if (!onDelete) return;
-    const isAutomated = typeof window !== "undefined" && window.navigator.webdriver;
-    if (!isAutomated) {
-      if (!confirm("Delete this project? This cannot be undone.")) return;
-    }
     setDeleting(true);
+    setError(null);
     try {
       await onDelete();
       router.push("/admin/projects");
@@ -231,6 +230,7 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
     } catch (err: any) {
       setError(err.message || "Failed to delete project");
       setDeleting(false);
+      setShowDeleteModal(false);
     }
   }
 
@@ -568,15 +568,25 @@ export default function ProjectForm({ initial, onSubmit, submitLabel, onDelete, 
         {onDelete && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             disabled={deleting}
-            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+            className="ml-auto px-5 py-2.5 rounded-lg border border-red-800/60 text-red-400/70 font-body font-semibold text-sm hover:bg-red-900/20 hover:border-red-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Trash2 size={14} className="shrink-0" />
             <span>{deleting ? "Deleting…" : "Delete"}</span>
           </button>
         )}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Project"
+        itemName={form.title || "this project"}
+        description="Are you sure you want to permanently delete this project case study? This action cannot be undone."
+        isDeleting={deleting}
+      />
     </form>
   );
 }

@@ -1,22 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-function supabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const db = supabase();
-
-  const { data: events } = await db
+  const { data: events, error } = await supabase
     .from("Event")
-    .select("*, Registration(id, status)")
+    .select("id, slug, title, description, category, type, priceKes, capacity, startsAt, location, ownerType, imageUrl, Registration(id, status)")
     .eq("status", "PUBLISHED")
     .order("startsAt", { ascending: true });
 
-  if (!events) return Response.json([]);
+  if (error || !events) return Response.json([]);
 
   const mapped = events.map((e) => {
     const activeCount = ((e.Registration as { status: string }[] | null) ?? []).filter(
