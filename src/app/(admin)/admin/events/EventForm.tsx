@@ -3,13 +3,12 @@
 import { useState, useRef, useCallback, FormEvent, DragEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ImageIcon, UploadCloud, Trash2, X } from "@/components/icons";
-import { EVENT_CATEGORIES } from "@/data/eventCategories";
 
 export interface EventSubmitPayload {
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category?: string;
   type: "FREE" | "PAID";
   priceKes: number;
   capacity: number | null;
@@ -26,7 +25,7 @@ export interface EventFormData {
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category?: string;
   type: "FREE" | "PAID";
   priceKes: string;
   capacity: string;
@@ -75,7 +74,7 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
     slug: initial?.slug ?? "",
     title: initial?.title ?? "",
     description: initial?.description ?? "",
-    category: initial?.category ?? EVENT_CATEGORIES[0].id,
+    category: initial?.category ?? "",
     type: initial?.type ?? "FREE",
     priceKes: initial?.priceKes ?? "0",
     capacity: initial?.capacity ?? "",
@@ -177,7 +176,7 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
       slug: form.slug,
       title: form.title,
       description: form.description,
-      category: form.category,
+      category: form.category || "",
       type: form.type,
       priceKes: form.type === "FREE" ? 0 : isNaN(price) ? 0 : price,
       capacity: isNaN(cap as any) ? null : cap,
@@ -246,21 +245,7 @@ export default function EventForm({ partners, initial, onSubmit, submitLabel, on
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-5">
-          <div>
-            <label className={LABEL}>Category</label>
-            <select
-              value={form.category}
-              onChange={(e) => set("category", e.target.value)}
-              className={SELECT}
-            >
-              {EVENT_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label className={LABEL}>Starts At</label>
             <input

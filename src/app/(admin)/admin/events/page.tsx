@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Plus, ArrowLeft, Calendar, MapPin, Users } from "@/components/icons";
-import { getCategoryGradient } from "@/data/eventCategories";
 
 export default async function AdminEventsPage() {
   const supabase = await createClient();
@@ -64,7 +63,6 @@ export default async function AdminEventsPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {events.map((event) => {
-            const colors = getCategoryGradient(event.category);
             const activeRegs = ((event.Registration as { status: string }[] | null) ?? []).filter(
               (r) => r.status !== "CANCELLED",
             ).length;
@@ -89,21 +87,15 @@ export default async function AdminEventsPage() {
                       </div>
                     ) : (
                       <div
-                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center text-white font-display font-bold text-3xl sm:text-4xl shadow-md border border-white/20 dark:border-white/10 select-none transition-transform duration-300 group-hover:scale-105"
-                        style={{
-                          backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
-                        }}
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center text-teal font-display font-bold text-3xl sm:text-4xl shadow-md border border-white/20 dark:border-white/10 select-none transition-transform duration-300 group-hover:scale-105 bg-gradient-to-br from-amber to-gold"
                       >
                         {event.title.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
 
-                  {/* Status & Category Tag Row */}
-                  <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
-                    <span className="font-body text-[9px] uppercase font-semibold text-amber/80 tracking-wider bg-amber/5 px-2 py-0.5 rounded border border-amber/10">
-                      {event.category}
-                    </span>
+                  {/* Status Tag Row */}
+                  <div className="flex items-center justify-center gap-2 mb-2">
                     <span
                       className={`font-body text-[9px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded border ${
                         event.status === "PUBLISHED"

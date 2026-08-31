@@ -8,7 +8,7 @@ export const eventSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens only"),
   title: z.string().trim().min(2, "Title must be at least 2 characters"),
   description: z.string().trim().min(10, "Description must be at least 10 characters"),
-  category: z.string().trim().min(1, "Category is required"),
+  category: z.string().trim().default(""),
   type: z.enum(["FREE", "PAID"]),
   priceKes: z.coerce.number().int().nonnegative("Price must be a non-negative integer").default(0),
   capacity: z.coerce.number().int().positive("Capacity must be a positive integer").nullable().optional(),

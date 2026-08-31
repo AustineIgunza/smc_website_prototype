@@ -3,7 +3,7 @@ export interface PastEventData {
   slug: string;
   title: string;
   description: string;
-  category: "Flagship" | "Workshop" | "Networking" | "Competition" | "Agency Visit";
+  category?: string;
   date: string;
   location: string;
   attendanceCount: number;

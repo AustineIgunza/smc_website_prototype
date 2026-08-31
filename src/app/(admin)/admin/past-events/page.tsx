@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Calendar, Images, Users, Plus, ArrowLeft } from "@/components/icons";
-import { getCategoryGradient } from "@/data/eventCategories";
+import { Images, Plus, ArrowLeft } from "@/components/icons";
 
 export default async function AdminPastEventsPage() {
   const supabase = await createClient();
@@ -68,7 +67,6 @@ export default async function AdminPastEventsPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => {
-            const colors = getCategoryGradient(event.category);
             const photoCount = event.galleryUrls?.length || (event.coverImageUrl ? 1 : 0);
 
             return (
@@ -88,24 +86,15 @@ export default async function AdminPastEventsPage() {
                       />
                     ) : (
                       <div
-                        className="w-full h-full flex items-center justify-center text-white font-display font-bold text-2xl"
-                        style={{
-                          backgroundImage: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
-                        }}
+                        className="w-full h-full flex items-center justify-center text-teal font-display font-bold text-2xl bg-gradient-to-br from-amber to-gold"
                       >
                         {event.title.charAt(0)}
                       </div>
                     )}
 
-                    <div className="absolute top-2.5 left-2.5">
-                      <span className="font-body text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-amber text-teal">
-                        {event.category}
-                      </span>
-                    </div>
-
                     <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-black/75 text-cream text-[10px] font-body px-2 py-0.5 rounded-full backdrop-blur-sm">
                       <Images size={12} className="text-amber" />
-                      <span>{photoCount} Photos</span>
+                      <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
                     </div>
                   </div>
 
@@ -113,28 +102,9 @@ export default async function AdminPastEventsPage() {
                     {event.title}
                   </h4>
 
-                  <p className="font-body text-cream/45 text-xs line-clamp-2 mb-4 leading-relaxed">
+                  <p className="font-body text-cream/45 text-xs line-clamp-2 mb-2 leading-relaxed">
                     {event.description}
                   </p>
-                </div>
-
-                {/* Footer Metadata */}
-                <div className="pt-3 border-t border-cream/5 font-body text-[11px] text-cream/50 flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <Calendar size={12} className="text-amber" />
-                    {new Date(event.date).toLocaleDateString("en-KE", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-
-                  {event.attendanceCount && (
-                    <span className="flex items-center gap-1 text-amber/80 font-semibold">
-                      <Users size={12} />
-                      {event.attendanceCount}+
-                    </span>
-                  )}
                 </div>
               </Link>
             );
@@ -144,3 +114,4 @@ export default async function AdminPastEventsPage() {
     </div>
   );
 }
+
