@@ -112,11 +112,30 @@ async function main() {
   console.log(`Created ${events.length} events`);
 
   // Seed Past Events
+  // Drop legacy placeholder dummy past events so only real SMC past events exist.
+  const legacyPastEventSlugs = [
+    "strathmore-marketing-summit-2025",
+    "brand-sprint-hackathon-2025",
+    "performance-marketing-masterclass",
+    "agency-safari-behind-the-scenes",
+    "cmo-roundtable-2024",
+  ];
+  const removedPastEvents = await prisma.pastEvent.deleteMany({
+    where: { slug: { in: legacyPastEventSlugs } },
+  });
+  if (removedPastEvents.count > 0) {
+    console.log(`Removed ${removedPastEvents.count} placeholder past events`);
+  }
+
   const { pastEventsData } = await import("../../data/pastEvents");
   for (const pe of pastEventsData) {
     await (prisma as any).pastEvent.upsert({
       where: { slug: pe.slug },
-      update: {},
+      update: {
+        title: pe.title,
+        description: pe.description,
+        attendanceCount: pe.attendanceCount,
+      },
       create: {
         slug: pe.slug,
         title: pe.title,
@@ -137,7 +156,7 @@ async function main() {
       },
     });
   }
-  console.log(`Created ${pastEventsData.length} past events`);
+  console.log(`Created/updated ${pastEventsData.length} past events`);
 
   // Portfolio projects — data lives in ./portfolioProjects so the REST
   // seeding path shares exactly the same source of truth.
@@ -159,7 +178,22 @@ async function main() {
 
   console.log(`Created ${portfolioProjects.length} portfolio projects`);
 
-  // Seed Team Members
+  // Team Members
+  // Drop legacy placeholder dummy accounts so the team reflects real SMC leadership only.
+  const legacyTeamMemberIds = [
+    "director-marketing",
+    "director-events",
+    "director-creatives",
+    "director-research",
+    "treasurer",
+  ];
+  const removedTeam = await prisma.teamMember.deleteMany({
+    where: { id: { in: legacyTeamMemberIds } },
+  });
+  if (removedTeam.count > 0) {
+    console.log(`Removed ${removedTeam.count} placeholder team members`);
+  }
+
   console.log("Seeding team members...");
   for (const member of team) {
     await prisma.teamMember.upsert({
@@ -177,6 +211,7 @@ async function main() {
         quote: member.quote ?? null,
         socials: (member.socials as any) ?? [],
         avatarGradient: member.avatarGradient,
+        avatarUrl: member.avatarUrl || null,
       },
     });
   }
