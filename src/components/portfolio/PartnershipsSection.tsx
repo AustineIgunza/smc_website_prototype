@@ -129,13 +129,13 @@ export default function PartnershipsSection({
                   {/* Top Bar: Brand Logo/Monogram & Industry Tag */}
                   <div className="flex items-center justify-between gap-4 mb-5">
                     <div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${accent.bg} border ${accent.border} flex items-center justify-center font-display font-black text-lg ${accent.text} shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden relative`}
+                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br ${accent.bg} border ${accent.border} flex items-center justify-center font-display font-black text-2xl sm:text-3xl ${accent.text} shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden relative shrink-0`}
                     >
                       {partner.logoUrl ? (
                         <img
                           src={partner.logoUrl}
                           alt={`${partner.name} logo`}
-                          className="w-full h-full object-contain p-1.5"
+                          className="w-full h-full object-contain p-2.5 sm:p-3"
                         />
                       ) : (
                         <span>{partner.name.substring(0, 2).toUpperCase()}</span>
