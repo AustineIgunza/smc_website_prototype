@@ -38,14 +38,18 @@ export const homeContentSchema = z.object({
   stat3Value: stat,
   stat3Label: text(),
 
-  insideEyebrow: text(2),
-  insideTitleStart: text(),
-  insideTitleAccent: text(),
-  insideSubtitle: longText,
-  insideTile1Label: text(),
-  insideTile2Label: text(),
-  insideTile3Label: text(),
-  insideTile4Label: text(),
+  insideEyebrow: z.string().trim().default(""),
+  insideTitleStart: z.string().trim().default(""),
+  insideTitleAccent: z.string().trim().default(""),
+  insideSubtitle: z.string().trim().optional().default(""),
+  insideTile1Label: z.string().trim().optional().default(""),
+  insideTile2Label: z.string().trim().optional().default(""),
+  insideTile3Label: z.string().trim().optional().default(""),
+  insideTile4Label: z.string().trim().optional().default(""),
+  insideTile1Image: z.string().trim().optional().nullable(),
+  insideTile2Image: z.string().trim().optional().nullable(),
+  insideTile3Image: z.string().trim().optional().nullable(),
+  insideTile4Image: z.string().trim().optional().nullable(),
 });
 
 export const homeContentUpdateSchema = homeContentSchema.partial();

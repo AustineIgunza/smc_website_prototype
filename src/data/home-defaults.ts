@@ -36,11 +36,15 @@ export interface HomeContent {
   insideEyebrow: string;
   insideTitleStart: string;
   insideTitleAccent: string;
-  insideSubtitle: string;
-  insideTile1Label: string;
-  insideTile2Label: string;
-  insideTile3Label: string;
-  insideTile4Label: string;
+  insideSubtitle?: string;
+  insideTile1Label?: string;
+  insideTile2Label?: string;
+  insideTile3Label?: string;
+  insideTile4Label?: string;
+  insideTile1Image?: string;
+  insideTile2Image?: string;
+  insideTile3Image?: string;
+  insideTile4Image?: string;
 }
 
 export const DEFAULT_HOME_CONTENT: HomeContent = {
@@ -81,13 +85,15 @@ export const DEFAULT_HOME_CONTENT: HomeContent = {
   stat3Value: 5,
   stat3Label: "Industry Partners: Connecting students with the best",
 
-  insideEyebrow: "Inside the Agency",
-  insideTitleStart: "A Look at",
-  insideTitleAccent: "What We Do",
-  insideSubtitle:
-    "From brand strategy sessions to live campaign shoots, here's a glimpse inside the SMC experience.",
-  insideTile1Label: "Workshop Session",
-  insideTile2Label: "Marketing Week Panel",
-  insideTile3Label: "Pitch Day",
-  insideTile4Label: "Team Bonding",
+  insideEyebrow: "Life at SMC",
+  insideTitleStart: "Moments in",
+  insideTitleAccent: "Action",
+  insideSubtitle: "",
+  insideTile1Label: "",
+  insideTile2Label: "",
+  insideTile3Label: "",
+  insideTile4Label: "",
+  insideTile1Image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200&auto=format&fit=crop",
+  insideTile2Image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop",
+  insideTile3Image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1200&auto=format&fit=crop",
 };
