@@ -172,6 +172,7 @@ export default function TeamForm({ initial, onSubmit, submitLabel, onDelete, isE
     setError(null);
     try {
       await onDelete();
+      setShowDeleteModal(false);
       router.push("/admin/team");
       router.refresh();
     } catch (err: any) {

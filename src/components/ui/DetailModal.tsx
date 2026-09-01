@@ -28,14 +28,14 @@ export default function DetailModal({ open, onClose, children, title }: DetailMo
       document.body.style.overflow = "hidden";
       // Focus the panel after animation
       const timer = setTimeout(() => panelRef.current?.focus(), 100);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "";
+      };
     } else {
       document.body.style.overflow = "";
       previousFocus.current?.focus();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [open]);
 
   // Close on Escape
