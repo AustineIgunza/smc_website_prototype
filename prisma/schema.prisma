@@ -183,14 +183,14 @@ model HomeContent {
   stat3Value Int
   stat3Label String
 
-  insideEyebrow     String
-  insideTitleStart  String
-  insideTitleAccent String
-  insideSubtitle    String
   insideTile1Label  String
   insideTile2Label  String
   insideTile3Label  String
   insideTile4Label  String
+  insideTile1Image  String?
+  insideTile2Image  String?
+  insideTile3Image  String?
+  insideTile4Image  String?
 
   updatedAt DateTime @updatedAt
 }

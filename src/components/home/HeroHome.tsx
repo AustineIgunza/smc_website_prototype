@@ -57,10 +57,14 @@ export default function HeroHome({ content = DEFAULT_HOME_CONTENT }: { content?:
       ref={ref}
       className="relative min-h-[100dvh] flex items-center overflow-hidden"
     >
-      {/* Background image placeholder — replace src with a real event/auditorium photo */}
+      {/* Background: THE 13TH auditorium shot — the biggest event of the year. */}
       <div className="absolute inset-0 bg-navy">
-        {/* TODO: Add a real hero image here:
-            <Image src="/images/hero-bg.jpg" alt="" fill className="object-cover" priority /> */}
+        <img
+          src="/events/the13th-audience-1.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/80 to-navy/50" />
       </div>
 

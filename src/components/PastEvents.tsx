@@ -153,6 +153,15 @@ export default function PastEvents() {
       .then((data) => {
         if (Array.isArray(data)) {
           setEvents(data);
+          // Deep-link support: /events/past?event=<slug> opens that event's modal.
+          if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get("event");
+            if (slug) {
+              const match = data.find((e: PastEventData) => e.slug === slug);
+              if (match) setSelectedEvent(match);
+            }
+          }
         }
         setLoading(false);
       })

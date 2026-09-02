@@ -38,10 +38,6 @@ export const homeContentSchema = z.object({
   stat3Value: stat,
   stat3Label: text(),
 
-  insideEyebrow: text(2),
-  insideTitleStart: text(),
-  insideTitleAccent: text(),
-  insideSubtitle: longText,
   insideTile1Label: text(),
   insideTile2Label: text(),
   insideTile3Label: text(),

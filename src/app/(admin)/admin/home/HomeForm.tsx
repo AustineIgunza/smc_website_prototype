@@ -195,21 +195,7 @@ export default function HomeForm({ initial }: { initial: HomeContent }) {
         </div>
       </Section>
 
-      <Section title="Inside the Agency">
-        <Field label="Eyebrow">
-          <input className={INPUT} value={form.insideEyebrow} onChange={(e) => set("insideEyebrow", e.target.value)} />
-        </Field>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Title (start)">
-            <input className={INPUT} value={form.insideTitleStart} onChange={(e) => set("insideTitleStart", e.target.value)} />
-          </Field>
-          <Field label="Title accent (highlighted)">
-            <input className={INPUT} value={form.insideTitleAccent} onChange={(e) => set("insideTitleAccent", e.target.value)} />
-          </Field>
-        </div>
-        <Field label="Subtitle">
-          <textarea className={TEXTAREA} value={form.insideSubtitle} onChange={(e) => set("insideSubtitle", e.target.value)} />
-        </Field>
+      <Section title="Image Tiles" description="Labels on the four bento tiles after Our Story.">
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Tile 1 label">
             <input className={INPUT} value={form.insideTile1Label} onChange={(e) => set("insideTile1Label", e.target.value)} />

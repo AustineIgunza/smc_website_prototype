@@ -33,14 +33,14 @@ export interface HomeContent {
   stat3Value: number;
   stat3Label: string;
 
-  insideEyebrow: string;
-  insideTitleStart: string;
-  insideTitleAccent: string;
-  insideSubtitle: string;
   insideTile1Label: string;
   insideTile2Label: string;
   insideTile3Label: string;
   insideTile4Label: string;
+  insideTile1Image: string | null;
+  insideTile2Image: string | null;
+  insideTile3Image: string | null;
+  insideTile4Image: string | null;
 }
 
 export const DEFAULT_HOME_CONTENT: HomeContent = {
@@ -59,35 +59,34 @@ export const DEFAULT_HOME_CONTENT: HomeContent = {
   missionTitle: "Building Marketing Leaders",
   missionTitleAccent: "From the Ground Up",
   missionBody:
-    "We equip students with the strategic thinking, creative skills, and industry connections needed to thrive in the fast-evolving world of marketing. Through hands-on campaigns, workshops, and mentorship, we transform ambitious students into agency-ready professionals.",
+    "Educate, inspire and equip members with the tools and support needed to secure exciting employment opportunities, thrive in entrepreneurship, and become world-class leaders in the field of marketing.",
 
   visionEyebrow: "Our Vision",
-  visionTitle: "The Most Impactful",
-  visionTitleAccent: "Student Marketing Hub",
+  visionTitle: "The Driving Force Behind",
+  visionTitleAccent: "Student Entrepreneurship",
   visionBody:
-    "To be the leading student-run marketing organization in Africa, a launchpad where bold ideas become real campaigns, and where every member graduates with a portfolio, a network, and the confidence to lead.",
+    "Be the driving force behind student entrepreneurship in Strathmore and the next generation of marketing professionals and thought leaders in Kenya.",
 
-  storyEyebrow: "Est. 2014",
+  storyEyebrow: "Rebuilt in 2024/2025",
   storyHeading: "Our Story",
   storyParagraph1:
-    "Founded in 2014 at Strathmore University, the Strathmore Marketing Club began as a small group of students passionate about bridging the gap between classroom theory and real-world marketing practice. What started as informal study sessions quickly grew into a full-fledged student organization.",
+    "The club entered the 2024/2025 academic year in a unique position. After a period of inactivity in previous years, it was revived through the leadership of Kennedy Karanja, who rebuilt its foundation before graduating. When the current Executive Team took office in May 2025, the club had no registered members, no active projects, and no existing partnerships — they started completely from the ground up.",
   storyParagraph2:
-    "Today, SMC is the premier student-run marketing organization at Strathmore, giving members hands-on experience in branding, digital strategy, content creation, and campaign execution through partnerships with real brands and agencies across Kenya.",
+    "Through focused recruitment, visibility efforts, and consistent engagement, the club grew to 53 members and ran 12 events within just seven months, culminating in THE 13TH as its biggest and most successful partnership to date.",
 
-  stat1Value: 30,
+  stat1Value: 53,
   stat1Label: "Active Members",
-  stat2Value: 10,
-  stat2Label: "Events Hosted",
-  stat3Value: 5,
-  stat3Label: "Industry Partners: Connecting students with the best",
+  stat2Value: 12,
+  stat2Label: "Events in 7 Months",
+  stat3Value: 4,
+  stat3Label: "External Partners",
 
-  insideEyebrow: "Inside the Agency",
-  insideTitleStart: "A Look at",
-  insideTitleAccent: "What We Do",
-  insideSubtitle:
-    "From brand strategy sessions to live campaign shoots, here's a glimpse inside the SMC experience.",
-  insideTile1Label: "Workshop Session",
-  insideTile2Label: "Marketing Week Panel",
-  insideTile3Label: "Pitch Day",
-  insideTile4Label: "Team Bonding",
+  insideTile1Label: "THE 13TH — Panel",
+  insideTile2Label: "THE 13TH — Audience",
+  insideTile3Label: "Subaru Visit",
+  insideTile4Label: "Mathare CSR Visit",
+  insideTile1Image: "/events/the13th-panel.jpg",
+  insideTile2Image: "/events/the13th-audience-1.jpg",
+  insideTile3Image: "/events/subaru-group-2.jpg",
+  insideTile4Image: "/events/mathare-kids-bus.jpg",
 };

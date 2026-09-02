@@ -57,28 +57,28 @@ export const DEFAULT_PARTNERSHIPS_CONTENT: PartnershipsContent = {
     {
       id: "naivera",
       name: "Naivera",
-      industry: "Fintech & Digital Engagement",
+      industry: "Real Estate",
       description:
         "Gives the club real-world insight into modern marketing practices and connects members with valuable mentorship, offering hands-on understanding of branding and digital engagement.",
     },
     {
       id: "kcb",
       name: "KCB",
-      industry: "Banking & Financial Services",
+      industry: "Banking",
       description:
         "Supported the club's presence at THE 13TH and gave members exposure to professional, corporate-level marketing strategies within the banking industry.",
     },
     {
       id: "subaru",
       name: "Subaru",
-      industry: "Automotive & Mobility",
+      industry: "Automotive",
       description:
         "Enabled an industrial visit and a presence at THE 13TH, giving members firsthand exposure to automotive brand positioning and experiential promotional strategies.",
     },
     {
       id: "nation-media",
       name: "Nation Media",
-      industry: "Media & Broadcasting",
+      industry: "Media",
       description:
         "Offers insight into media-focused marketing, including advertising and communication strategies, deepening members' understanding of how media shapes brand visibility and public engagement.",
     },

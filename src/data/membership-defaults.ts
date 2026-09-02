@@ -39,7 +39,7 @@ export const DEFAULT_MEMBERSHIP_CONTENT: MembershipContent = {
       id: "industry-exposure",
       icon: "target",
       title: "Real Industry Exposure",
-      desc: "Members gain hands on access to corporates like KCB, Subaru, Nation Media and Naivera, covering banking, automotive, media and real estate marketing.",
+      desc: "Members gain hands-on access to corporates like KCB, Subaru, Nation Media, and Naivera, covering banking, automotive, media, and real estate marketing.",
     },
     {
       id: "portfolio-building",
@@ -50,19 +50,19 @@ export const DEFAULT_MEMBERSHIP_CONTENT: MembershipContent = {
     {
       id: "leadership-execution",
       icon: "trophy",
-      title: "Leadership and Event Execution Skills",
-      desc: "Organizing 12 events in 7 months including THE 13TH with 250-300 attendees, builds genuine project management experience.",
+      title: "Leadership & Event Execution Skills",
+      desc: "Organizing 12 events in 7 months, including THE 13TH with 250–300 attendees, builds genuine project management experience.",
     },
     {
       id: "networking",
       icon: "handshake",
-      title: "Networking with Professionals and Peers",
-      desc: "Roundtables, panel discussions and industrial visits connect members directly with industry professionals and the wider student community.",
+      title: "Networking with Professionals & Peers",
+      desc: "Roundtables, panel discussions, and industrial visits connect members directly with industry professionals and the wider student community.",
     },
     {
       id: "community-growth",
       icon: "brain",
-      title: "Community Impact and Personal Growth",
+      title: "Community Impact & Personal Growth",
       desc: "Initiatives like the Mathare CSR visit and the Self-Love Event let members develop interpersonal skills while making a genuine difference beyond campus.",
     },
   ],
