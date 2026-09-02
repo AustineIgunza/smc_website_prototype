@@ -28,7 +28,7 @@ export const team: TeamMember[] = [
     quote: "",
     socials: [],
     avatarGradient: ["#FFA829", "#CC8802"],
-    avatarUrl: "https://bnnxfjhqfvurmgyitenc.supabase.co/storage/v1/object/public/avatars/new-1787494639912.jpg",
+    avatarUrl: "/team/devyan-jethwa.jpg",
   },
   {
     id: "vice-chairperson",
@@ -42,7 +42,7 @@ export const team: TeamMember[] = [
     quote: "",
     socials: [],
     avatarGradient: ["#013953", "#00313F"],
-    avatarUrl: "https://bnnxfjhqfvurmgyitenc.supabase.co/storage/v1/object/public/avatars/new-1787495080775.jpg",
+    avatarUrl: "/team/joy-mutanu.jpg",
   },
   {
     id: "secretary-general",
