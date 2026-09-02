@@ -29,7 +29,15 @@ export const teamMemberSchema = z.object({
     .optional()
     .default([]),
   avatarGradient: z.array(z.string().trim()).length(2, "Avatar gradient must have exactly 2 colors"),
-  avatarUrl: z.string().url("Must be a valid URL").nullish().or(z.literal("")),
+  // Accept absolute URLs (Supabase Storage), relative paths served from /public
+  // (e.g. "/team/devyan-jethwa.jpg"), empty string, null, or undefined.
+  avatarUrl: z
+    .union([
+      z.string().url("Must be a valid URL"),
+      z.string().regex(/^\/[\w.\-\/]+$/, "Must be a valid absolute path (starting with /)"),
+      z.literal(""),
+    ])
+    .nullish(),
 });
 
 export const teamMemberUpdateSchema = teamMemberSchema.partial();

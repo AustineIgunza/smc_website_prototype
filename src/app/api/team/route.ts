@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { teamMemberSchema } from "@/backend/validators/teamMember";
 import { generateUniqueTeamSlug } from "@/lib/team-slug";
+import { sortExecutiveTeam } from "@/lib/team-order";
 
 export async function GET() {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export async function GET() {
     .from("TeamMember")
     .select("*")
     .order("createdAt", { ascending: true });
-  return NextResponse.json(members ?? []);
+  return NextResponse.json(sortExecutiveTeam(members ?? []));
 }
 
 export async function POST(request: NextRequest) {

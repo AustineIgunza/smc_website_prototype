@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Plus, ArrowLeft } from "@/components/icons";
+import { sortExecutiveTeam } from "@/lib/team-order";
 
 export default async function AdminTeamPage() {
   const supabase = await createClient();
@@ -12,7 +13,7 @@ export default async function AdminTeamPage() {
     .from("TeamMember")
     .select("*")
     .order("createdAt", { ascending: true });
-  const members = membersData || [];
+  const members = sortExecutiveTeam(membersData || []);
 
   return (
     <div className="min-h-screen pt-24 pb-10 px-6 sm:px-10 max-w-5xl mx-auto">
