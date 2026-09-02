@@ -47,11 +47,6 @@ export const DEFAULT_PARTNERSHIPS_CONTENT: PartnershipsContent = {
       name: "Clubs and Societies",
       category: "Student Life & Extracurriculars",
     },
-    {
-      id: "student-council",
-      name: "Student Council",
-      category: "Student Leadership & Governance",
-    },
   ],
   externalPartners: [
     {
