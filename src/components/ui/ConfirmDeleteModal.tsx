@@ -29,13 +29,13 @@ export default function ConfirmDeleteModal({
     if (isOpen) {
       document.body.style.overflow = "hidden";
       const timer = setTimeout(() => panelRef.current?.focus(), 100);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "";
+      };
     } else {
       document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
 
   const handleKeyDown = useCallback(
