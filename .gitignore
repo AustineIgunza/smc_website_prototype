@@ -55,3 +55,7 @@ AGENTS.md
 
 .vercel
 .env*
+
+# Source-of-truth documents (PDF + raw uncompressed photos) kept locally
+# for reference; compressed derivatives live in /public/.
+source-docs/
